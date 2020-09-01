@@ -1,2 +1,12 @@
 server:
   port: 8081
+
+spring:
+  rabbitmq:
+    port: 5672
+  cloud:
+    stream:
+      bindings:
+        input:
+          destination: pumpconfigupdate
+

@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,20 +24,21 @@ import static quintin.raspberrypi.control_hub.controller.validation.PumpConfigVa
 public class RaspberryPiController {
 
     private PumpConfigService pumpConfigService;
-
+    private Source source;
     private UpdatedPumpConfigPublisher updatedPumpConfigPublisher;
 
     @Autowired
-    public RaspberryPiController(PumpConfigService pumpConfigService) {
+    public RaspberryPiController(PumpConfigService pumpConfigService, Source source) {
         this.pumpConfigService = pumpConfigService;
         this.updatedPumpConfigPublisher = new UpdatedPumpConfigPublisher();
+        this.source = source;
     }
 
     @PostMapping("pump-configuration/new")
-    public ResponseEntity<Void> setNewPumpConfig(@RequestBody PumpConfig newPumpConfig) throws IOException, TimeoutException {
+    public ResponseEntity<Void> setNewPumpConfig(@RequestBody PumpConfig newPumpConfig){
         validateTurnOffTemperature(newPumpConfig.getTurnOffTemp());
+        this.pumpConfigService.notifyPumpControllerOfUpdate(newPumpConfig);
         this.pumpConfigService.saveNewConfig(newPumpConfig);
-        this.updatedPumpConfigPublisher.publish();
         return new ResponseEntity(HttpStatus.OK);
     }
 
