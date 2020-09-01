@@ -28,7 +28,7 @@ public class UpdatedPumpConfig {
             this.pumpConfig.setTurnOffTemp(responseEntity.getBody().getTurnOffTemp());
             this.pumpConfig.setOverrideStatus(responseEntity.getBody().getOverrideStatus());
             this.pumpConfig.notifyObservers(this.pumpConfig);
-            log.info("Received - updated configuration");
+            log.info(String.format("Received - %s", msg));
         }
     }
 
