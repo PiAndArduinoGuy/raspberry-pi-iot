@@ -4,14 +4,14 @@ This project consists of three sub projects, an Angular project and two Spring B
 
 ## Installation
 This project makes use of the RabbitMQ message broker and as such will require you to have an instance running in a docker container. The instance that was used was the 3.6.9-mamangement instance but there should not be a reason it wont work on the latest version, provided the instance also includes the management interface. The command to run is 
-```docker  docker run -d --name name_of_choice -p 15672:15672 -p 5672:5672 rabbitmq:3.6.9-management```.
-The project will also require you to have node installed, follow [this]https://nodejs.org/en/download/ link to install it for your operating system. with node installed we can also now install the needed Angular CLI. To install it globally run ```bash npm install -g @angular/cli```.
+```docker run -d --name name_of_choice -p 15672:15672 -p 5672:5672 rabbitmq:3.6.9-management```.
+The project will also require you to have node installed, follow [this](https://nodejs.org/en/download/) link to install it for your operating system. with node installed we can also now install the needed Angular CLI. To install it globally run ```npm install -g @angular/cli```.
 
 ## Control Hub
 To start the backend with which the user interacts with via the Angular project we simply run the main application in your IDE. This has to be done before the UI project is started as it relies on this sub project.
 
 ## Angular Project
-To start the Angular project navigate to the directory containing your *package.json* file and run ```bash npm install```, this will install all needed node modules on your local machine needed to run the Anular app. Next we serve the project by running ```bash ng serve```. This will host the UI on port ```bashlocalhost:4200```.
+To start the Angular project navigate to the directory containing your *package.json* file and run ```npm install```, this will install all needed node modules on your local machine needed to run the Anular app. Next we serve the project by running ```ng serve```. This will host the UI on port ```localhost:4200```.
 
 ## RaspberryPi Pump Controller
 To start this project, same as before, navigate to the main application class and run the program in your IDE.
