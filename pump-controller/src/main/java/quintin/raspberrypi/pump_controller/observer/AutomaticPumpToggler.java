@@ -16,24 +16,27 @@ import quintin.raspberrypi.pump_controller.domain.PumpToggler;
 
 @Slf4j
 @Component
-public class AutomaticPumpToggler implements Observer, Runnable{
+public class AutomaticPumpToggler implements Observer, Runnable {
+
     private double turnOffTemperature;
     private ScheduledFuture scheduledCheck;
     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
-    public AutomaticPumpToggler(){
+    public AutomaticPumpToggler() {
         this.setAutomaticTogglingInterval();
     }
 
     @Override
     public void update(final Observable observable, final Object updatedPumpConfig) {
         log.info("(Automatic toggler) Updated received");
-        this.turnOffTemperature = ((PumpConfig)updatedPumpConfig).getTurnOffTemp();
-        if(isOverridden(((PumpConfig)updatedPumpConfig).getOverrideStatus())){
+        this.turnOffTemperature = ((PumpConfig) updatedPumpConfig).getTurnOffTemp();
+        if (isOverridden(((PumpConfig) updatedPumpConfig).getOverrideStatus())) {
             this.scheduledCheck.cancel(true);
             log.info("Manual override has been set, automatic toggling paused");
         } else {
-            setAutomaticTogglingInterval();
+            if (scheduledCheck.isCancelled()) { // do not want another scheduler to run when initialized
+                setAutomaticTogglingInterval();
+            }
             log.info("Manual override has not been set, automatic toggling continued");
         }
     }
@@ -49,7 +52,7 @@ public class AutomaticPumpToggler implements Observer, Runnable{
     @Override
     public void run() {
         double ambientTemperature = AmbientTemperatureReader.readTemperature();
-        if (ambientTemperature < this.turnOffTemperature){
+        if (ambientTemperature < this.turnOffTemperature) {
             log.info("(Automatic toggler) determined that pump be put off");
             PumpToggler.turnOffPump();
         } else {
