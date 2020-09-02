@@ -1,0 +1,49 @@
+\documentclass{article}
+\usepackage{hyperref}
+\begin{document}
+	\section{ACD - Analog to Digital Conversion} % (fold)
+	\label{sec:acd_analog_to_digital_conversion}
+	An ACD converter is needed to translate analog data (temperature) from the thermistor to digital data (voltage) that the RaspberryPi can understand. If I were using an Arduino I would not need such a converter as an Arduino has an ADC converter built in where as the RaspberryPi is a digital only microcontroller. Using the MCP3008 for ADC, its pin out:
+	\begin{itemize}
+	\item VDD - power
+	\item DGND - Digital ground
+	\end{itemize}
+	used to power the converter
+	\begin{itemize}
+	\item DOUT - data out of the coverter (the covnerted data we desire)
+	\item CLK - clock pin
+	\item DIN - data in from raspberry pi
+	\item CS - Chip select
+	\end{itemize}
+	These 4 pins are used for the SPI (Serial Peripheral Interface) of the raspberry pi. Section \ref{sec:spi_serial_peripheral_interface} gives more on this.
+
+	\begin{itemize}
+		\item AGND - analog ground (used for precision which is optional and so can merely be connected to GND)
+		\item Vref - analog reference voltage (used as a scale for the ADC)
+	\end{itemize}
+
+	Everything above comes from \href{https://learn.adafruit.com/reading-a-analog-in-and-controlling-audio-volume-with-the-raspberry-pi?view=all}{Analog Inputs for Raspberry Pi Using the MCP3008}. Discussed below is how we can use this digital data from the ADC converter to translate the data into what we expect, see \href{https://learn.sparkfun.com/tutorials/analog-to-digital-conversion/all#:~:text=An%20Analog%20to%20Digital%20Converter,pin%20to%20a%20digital%20number.&text=ADCs%20can%20vary%20greatly%20between,%5E10)%20discrete%20analog%20levels.}{Analog to Digital Conversion by Adapfruit} for more.
+
+	Consider a microcontroller is powered with 5v, it understands 0v as a binary 0 and 5v as a binary 1. Now we have a problem when the voltage is anything between 0 and 5 volts (what will be binary 0 and what is binary 1) - this is analog data and is why micocontrollers have difficult time translating what analog data means, this is why we need an ADC converter, to understand analog data in a form it understands (digital data). The MCP3008 ADC converter is a 10-bit converter, meaning it can detect $2^{10} = 1024$ discrete analog levels. The ADC is a ratio value given as $\frac{Resolution of the ADC converter}{System Voltage} = \frac{ADC Reading}{Analog Voltage Measured}$. This means the converter will use the value 1023 to depict the system voltage and value between 0 and 1024 will be a ratio between the 5V and the ADC value 1023. The system voltage of the raspberry pi is either 3.3V or 5V dependending on the voltage pin used to power the converter. Thus we can get the \textit{analog voltage} from this equation that uses ADC values. As an example, imagine we are measuring a voltage with our Pi and the system voltage we are using is 5V, lets assume the ADC value measured on the Pi is 434 and we are using a 10-bit ADC converter. Now to get the analog voltage from this we do the following
+	\begin{equation}
+		\begin{array}{ccc}
+			\frac{1023}{5} & = & \frac{434}{Analog Voltage Measured}\\
+	 		Analog Voltage Measured & = & 2.12V
+		\end{array}
+	 \end{equation} 
+	
+	% section acd_analog_to_digital_conversion (end)
+
+	\section{SPI - Serial Peripheral Interface} % (fold)
+	\label{sec:spi_serial_peripheral_interface}
+
+	
+	% section spi_serial_peripheral_interface (end)
+
+	\section{Thermistor - Reading Temperature From Voltage} % (fold)
+	\label{sec:thermistor_reading_temperature_from_voltage}
+	An article titled \href{https://www.jameco.com/Jameco/workshop/techtip/temperature-measurement-ntc-thermistors.html#:~:text=Thermistor%20Response%20to%20Temperature,in%20response%20to%20temperature%20change.}{Thermistors/Temperature Measurement with NTC Thermistors} was referenced for this section of the research.
+	
+	% section thermistor_reading_temperature_from_voltage (end)
+
+\end{document}
