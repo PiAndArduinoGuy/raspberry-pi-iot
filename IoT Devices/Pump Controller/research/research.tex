@@ -1,5 +1,7 @@
 \documentclass{article}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
 \begin{document}
 	\section{ACD - Analog to Digital Conversion} % (fold)
 	\label{sec:acd_analog_to_digital_conversion}
@@ -36,7 +38,34 @@
 
 	\section{SPI - Serial Peripheral Interface} % (fold)
 	\label{sec:spi_serial_peripheral_interface}
+	SPI is a communication proocol. SPI is used for synchronous communucation between devices (a master and a slave). The 4 connections of SPI:
+	\begin{itemize}
+		\item SCLK - clock 
+		\item MOSI - Master Out Slave In which is a data line from the master device to the slave device
+		\item MISO - Master In Slave Out which is another data line for sending data from a slave to a master
+		\item SS - Slave Select used to tell the slave that it must be on the 'look out' for data (either sending or receiving)
+	\end{itemize}
+	As the pins suggested, devices oeprating with SPI can act either as a slave or as a master. The SS pin also hints at the ablity to connect multiple slaves to a master device. We can have 3 slaves and we can select which one we want to communicate with (either to receive data from them or to send data to) by applying or not applying voltage to the slave's SS connectionof interest. To start communucation with a slave device we set the SS pin to low.
 
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\textwidth]{images/multi_slave.png}
+	\caption{Image from \href{https://www.youtube.com/watch?v=ba0SQwjTQfw}{nanland}}	
+	\end{figure}
+
+	SPI is full duplex meaining you can send and receive data at the same time. It is not suited for long distance communication (\href{https://www.youtube.com/watch?v=ba0SQwjTQfw}{nanland} goes as far as saying that even more than a meter is not suited for SPI).
+
+	Now when it comes to programming the microcontroller for SPI communication, there are 4 modes of SPI we can set that correspond to when data must be read based on the clock signal send from master to slave via the CLK pin. These 4 modes can be 
+	\begin{enumerate}
+		\item Read/write when clock is low and on rising edge
+		\item Read/write when clock is high and on rising edge
+		\item Read/write when clock is low and on falling edge
+		\item Read/write when clock is high and on rising edge
+	\end{enumerate}
+
+	\href{https://www.youtube.com/watch?v=fvOAbDMzoks&t=6s}{Great Scott} explains the modes rather well. The mode to use depends on the device being used, see the datasheet of the device for more.
+
+	SPI transfers data at a CRAZY rate and is part in parsle the reason for its existance
 	
 	% section spi_serial_peripheral_interface (end)
 
