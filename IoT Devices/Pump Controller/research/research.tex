@@ -66,12 +66,26 @@
 	\href{https://www.youtube.com/watch?v=fvOAbDMzoks&t=6s}{Great Scott} explains the modes rather well. The mode to use depends on the device being used, see the datasheet of the device for more.
 
 	SPI transfers data at a CRAZY rate and is part in parsle the reason for its existance
+
+	There are 2 ways we can use SPI communication, software SPI or hardware SPI. Hardware SPi is if the devei has pins built specifically for SPI communication. Software SPI is used for devices that can be programmed to use the SPI protocol.
 	
 	% section spi_serial_peripheral_interface (end)
 
 	\section{Thermistor - Reading Temperature From Voltage} % (fold)
 	\label{sec:thermistor_reading_temperature_from_voltage}
-	An article titled \href{https://www.jameco.com/Jameco/workshop/techtip/temperature-measurement-ntc-thermistors.html#:~:text=Thermistor%20Response%20to%20Temperature,in%20response%20to%20temperature%20change.}{Thermistors/Temperature Measurement with NTC Thermistors} was referenced for this section of the research.
+	An article titled \href{https://www.jameco.com/Jameco/workshop/techtip/temperature-measurement-ntc-thermistors.html#:~:text=Thermistor%20Response%20to%20Temperature,in%20response%20to%20temperature%20change.}{Thermistors/Temperature Measurement with NTC Thermistors} was referenced for this section of the research. As well as an adafruit tutorial on the matter thant can be found \href{https://learn.adafruit.com/thermistor/using-a-thermistor}{here}.
+
+	An NTC (Negative Temperature Coefficient) thermistor will decrease its resitance with an increase in temperature.
+
+	To measure temperature with a thermistor we need to measure the resitance of the thermistor. To do this we can measure the voltage and an additional resitor along with the voltage divider and Ohm's law to calculate the resistance - we can get a better reading by averaging values and by using voltage lines that dont have noise on them. From the resitance we can convert it to a temperature reading using the Steinhart Equation (not as accuate as a temperature table that is provided by the manufacturer of the thermistor). It is given as 
+	\begin{equation}
+		\frac{1}{T} = A + Bln(R) + C(ln(R))^3
+	\end{equation}
+	This equation can be used if the manufacturer of the thermsitor provides the values for $A, B$ and $C$. An alternative is the simplified B parameter equation that only depends on the constant $B$ which most manufacturers do provide. 
+	\begin{equation}
+	 	\frac{1}{T} = \frac{1}{T_0} + \frac{1}{B}ln(\frac{R}{R_0})
+	 \end{equation} 
+	 Where $T_0$ and $R_0$ are kelvin room temperature and resitance at room temperature. This is essentially the steinhat equation with values for $A$ and $C$ substituted for specific values (see \href{https://en.wikipedia.org/wiki/Thermistor}{Wikipedia} for more).
 	
 	% section thermistor_reading_temperature_from_voltage (end)
 
