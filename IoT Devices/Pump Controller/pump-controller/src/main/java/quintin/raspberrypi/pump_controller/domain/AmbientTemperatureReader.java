@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AmbientTemperatureReader {
 
     public static double readTemperature(){
-        log.info("Code to read temperature (RaspberryPi specific)");
+        log.info("(RaspberryPi) Read temperature code here");
         return 20.00;
     }
 
