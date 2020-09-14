@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 import quintin.raspberrypi.pump_controller.data.OverrideStatus;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.domain.AmbientTemperatureReader;
+import quintin.raspberrypi.pump_controller.domain.PumpState;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
 
 @Slf4j
 @Component
 public class AutomaticPumpToggler implements Observer, Runnable {
-
     private double turnOffTemperature;
     private ScheduledFuture scheduledCheck;
     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
@@ -42,7 +42,7 @@ public class AutomaticPumpToggler implements Observer, Runnable {
     }
 
     private void setAutomaticTogglingInterval() {
-        this.scheduledCheck = scheduledExecutorService.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
+        this.scheduledCheck = scheduledExecutorService.scheduleAtFixedRate(this, 10, 10, TimeUnit.SECONDS);
     }
 
     private boolean isOverridden(OverrideStatus overrideStatus) {
@@ -52,10 +52,10 @@ public class AutomaticPumpToggler implements Observer, Runnable {
     @Override
     public void run() {
         double ambientTemperature = AmbientTemperatureReader.readTemperature();
-        if (ambientTemperature < this.turnOffTemperature) {
+        if (ambientTemperature < this.turnOffTemperature){
             log.info("(Automatic toggler) determined that pump be put off");
             PumpToggler.turnOffPump();
-        } else {
+        } else if (ambientTemperature > this.turnOffTemperature){
             log.info("(Automatic toggler) determined that pump be put on");
             PumpToggler.turnOnPump();
         }
