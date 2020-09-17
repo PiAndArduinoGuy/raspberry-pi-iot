@@ -42,7 +42,7 @@ public class PumpControllerInitializer implements CommandLineRunner {
 
 
     private void setInitialPumpConfig() {
-        ResponseEntity<PumpConfig> responseEntity = this.restTemplate.getForEntity("http://localhost:8080/pump-configuration", PumpConfig.class);
+        ResponseEntity<PumpConfig> responseEntity = this.restTemplate.getForEntity("http://192.168.0.111:8080/pump-configuration", PumpConfig.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()){
             log.info(String.format("Initial pump config obtained - %s", responseEntity.getBody()));
             this.pumpConfig.setOverrideStatus(responseEntity.getBody().getOverrideStatus());

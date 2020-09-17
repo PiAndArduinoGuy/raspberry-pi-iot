@@ -1,5 +1,6 @@
 package quintin.raspberrypi.pump_controller.observer;
 
+import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Executors;
@@ -21,9 +22,11 @@ public class AutomaticPumpToggler implements Observer, Runnable {
     private double turnOffTemperature;
     private ScheduledFuture scheduledCheck;
     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    private AmbientTemperatureReader ambientTemperatureReader;
 
-    public AutomaticPumpToggler() {
+    public AutomaticPumpToggler() throws IOException {
         this.setAutomaticTogglingInterval();
+        this.ambientTemperatureReader = new AmbientTemperatureReader();
     }
 
     @Override
@@ -51,8 +54,15 @@ public class AutomaticPumpToggler implements Observer, Runnable {
 
     @Override
     public void run() {
-        double ambientTemperature = AmbientTemperatureReader.readTemperature();
-        if (ambientTemperature < this.turnOffTemperature) {
+        double ambientTemperature = 0;
+        try {
+            ambientTemperature = this.ambientTemperatureReader.readTemperature();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (ambientTemperature < this.turnOffTemperature){
             log.info("(Automatic toggler) determined that pump be put off");
             PumpToggler.turnOffPump();
         } else {

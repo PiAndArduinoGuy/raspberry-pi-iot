@@ -4,6 +4,7 @@ server:
 spring:
   rabbitmq:
     port: 5672
+    host: 192.168.0.111
   cloud:
     stream:
       bindings:
