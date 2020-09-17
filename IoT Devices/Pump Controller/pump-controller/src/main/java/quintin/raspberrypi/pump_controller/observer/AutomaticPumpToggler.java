@@ -45,7 +45,7 @@ public class AutomaticPumpToggler implements Observer, Runnable {
     }
 
     private void setAutomaticTogglingInterval() {
-        this.scheduledCheck = scheduledExecutorService.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
+        this.scheduledCheck = scheduledExecutorService.scheduleAtFixedRate(this, 10, 10, TimeUnit.SECONDS);
     }
 
     private boolean isOverridden(OverrideStatus overrideStatus) {
@@ -62,10 +62,10 @@ public class AutomaticPumpToggler implements Observer, Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if (ambientTemperature < this.turnOffTemperature){
+        if (ambientTemperature < this.turnOffTemperature) {
             log.info("(Automatic toggler) determined that pump be put off");
             PumpToggler.turnOffPump();
-        } else {
+        } else if (ambientTemperature > this.turnOffTemperature) {
             log.info("(Automatic toggler) determined that pump be put on");
             PumpToggler.turnOnPump();
         }
