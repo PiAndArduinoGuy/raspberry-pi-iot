@@ -50,7 +50,7 @@ public class AmbientTemperatureReader {
         // calculate and return conversion value from result bytes
         int adc = (result[1] << 8) & 0b1100000000; //merge data[1] & data[2] to get 10-bit result
         adc |= (result[2] & 0xff);
-        log.debug(String.format("(RaspberryPi) Thermistor digital voltage reading: %s", adc));
+        log.info(String.format("(RaspberryPi) Thermistor digital voltage reading: %s", adc));
         return adc;
 
     }
@@ -58,17 +58,17 @@ public class AmbientTemperatureReader {
     private static double getTemperatureFromThermistorResistance(final double thermistorResistance) {
         // perform B-parameter equation to get temperature from thermistor resistance
         double oneOverB = (1 / B_COEFFICIENT);
-        log.debug(String.format("oneOverB: %s", oneOverB));
+        log.info(String.format("oneOverB: %s", oneOverB));
         double thermResOverThermNomRes = (thermistorResistance / THERMISTOR_NOMINAL_RESISTANCE);
-        log.debug(String.format("thermResOverThermNomRes: %s", thermResOverThermNomRes));
+        log.info(String.format("thermResOverThermNomRes: %s", thermResOverThermNomRes));
         double lnThermResOverThermNomRes = Math.log(thermResOverThermNomRes);
-        log.debug(String.format("lnThermResOverThermNomRes: %s", lnThermResOverThermNomRes));
+        log.info(String.format("lnThermResOverThermNomRes: %s", lnThermResOverThermNomRes));
         double oneOverNomTemp = (1.0 / (NOMINAL_TEMPERATURE + 273.15));
-        log.debug(String.format("oneOverNomTemp: %s", oneOverNomTemp));
+        log.info(String.format("oneOverNomTemp: %s", oneOverNomTemp));
         double inverseTempKelvin = oneOverNomTemp + oneOverB * lnThermResOverThermNomRes;
-        log.debug(String.format("inverseTempKelvin: %s", inverseTempKelvin));
+        log.info(String.format("inverseTempKelvin: %s", inverseTempKelvin));
         double recipInverseTempKelvin = 1 / inverseTempKelvin;
-        log.debug(String.format("recipInverseTempKelvin: %s", recipInverseTempKelvin));
+        log.info(String.format("recipInverseTempKelvin: %s", recipInverseTempKelvin));
         double temperature = (recipInverseTempKelvin - 273.15);
         log.info(String.format("(RaspberryPi) Temperature: %s", temperature));
         return temperature;
@@ -76,7 +76,7 @@ public class AmbientTemperatureReader {
 
     private static double getThermistorResistanceFromAdcVoltage(final double conversion_value) {
         double thermistorResistance = (SERIES_RESISTANCE) / ((1023.0 / conversion_value) - 1.0);
-        log.debug(String.format("(RaspberryPi) Thermistor resistance: %s", thermistorResistance));
+        log.info(String.format("(RaspberryPi) Thermistor resistance: %s", thermistorResistance));
         return thermistorResistance;
     }
 
