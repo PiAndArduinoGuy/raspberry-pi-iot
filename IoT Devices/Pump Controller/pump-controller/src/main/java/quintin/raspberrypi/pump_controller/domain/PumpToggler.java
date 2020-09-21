@@ -18,7 +18,7 @@ public class PumpToggler {
 
     public static void turnOffPump(){
         if (pumpState.equals(PumpState.ON)){
-            log.info("(RaspberryPi) Turn off pump code here ");
+            log.info("(RaspberryPi) Relay deactivated");
             signalPin.low();
             pumpState = PumpState.OFF;
         } else {
@@ -28,7 +28,7 @@ public class PumpToggler {
 
     public static void turnOnPump(){
         if (pumpState.equals(PumpState.OFF)){
-            log.info("(RaspberryPi) Turn on code here ");
+            log.info("(RaspberryPi) Relay activated");
             signalPin.high();
             pumpState = PumpState.ON;
         } else {
