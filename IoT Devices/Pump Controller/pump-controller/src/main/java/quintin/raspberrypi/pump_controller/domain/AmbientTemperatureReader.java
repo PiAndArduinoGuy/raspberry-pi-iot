@@ -50,7 +50,7 @@ public class AmbientTemperatureReader {
         // calculate and return conversion value from result bytes
         int adc = (result[1] << 8) & 0b1100000000; //merge data[1] & data[2] to get 10-bit result
         adc |= (result[2] & 0xff);
-        log.info(String.format("(RaspberryPi) Thermistor digital voltage reading: %s", adc));
+        log.debug(String.format("(RaspberryPi) Thermistor digital voltage reading: %s", adc));
         return adc;
 
     }
