@@ -58,17 +58,17 @@ public class AmbientTemperatureReader {
     private static double getTemperatureFromThermistorResistance(final double thermistorResistance) {
         // perform B-parameter equation to get temperature from thermistor resistance
         double oneOverB = (1 / B_COEFFICIENT);
-        log.info(String.format("oneOverB: %s", oneOverB));
+        log.debug(String.format("oneOverB: %s", oneOverB));
         double thermResOverThermNomRes = (thermistorResistance / THERMISTOR_NOMINAL_RESISTANCE);
-        log.info(String.format("thermResOverThermNomRes: %s", thermResOverThermNomRes));
+        log.debug(String.format("thermResOverThermNomRes: %s", thermResOverThermNomRes));
         double lnThermResOverThermNomRes = Math.log(thermResOverThermNomRes);
-        log.info(String.format("lnThermResOverThermNomRes: %s", lnThermResOverThermNomRes));
+        log.debug(String.format("lnThermResOverThermNomRes: %s", lnThermResOverThermNomRes));
         double oneOverNomTemp = (1.0 / (NOMINAL_TEMPERATURE + 273.15));
-        log.info(String.format("oneOverNomTemp: %s", oneOverNomTemp));
+        log.debug(String.format("oneOverNomTemp: %s", oneOverNomTemp));
         double inverseTempKelvin = oneOverNomTemp + oneOverB * lnThermResOverThermNomRes;
-        log.info(String.format("inverseTempKelvin: %s", inverseTempKelvin));
+        log.debug(String.format("inverseTempKelvin: %s", inverseTempKelvin));
         double recipInverseTempKelvin = 1 / inverseTempKelvin;
-        log.info(String.format("recipInverseTempKelvin: %s", recipInverseTempKelvin));
+        log.debug(String.format("recipInverseTempKelvin: %s", recipInverseTempKelvin));
         double temperature = (recipInverseTempKelvin - 273.15);
         log.info(String.format("(RaspberryPi) Temperature: %s", temperature));
         return temperature;
@@ -76,7 +76,7 @@ public class AmbientTemperatureReader {
 
     private static double getThermistorResistanceFromAdcVoltage(final double conversion_value) {
         double thermistorResistance = (SERIES_RESISTANCE) / ((1023.0 / conversion_value) - 1.0);
-        log.info(String.format("(RaspberryPi) Thermistor resistance: %s", thermistorResistance));
+        log.debug(String.format("(RaspberryPi) Thermistor resistance: %s", thermistorResistance));
         return thermistorResistance;
     }
 
