@@ -40,12 +40,19 @@ public class AutomaticPumpToggler implements Observer, Runnable {
             if (scheduledCheck.isCancelled()) { // do not want another scheduler to run when initialized
                 setAutomaticTogglingInterval();
             }
+            restartAutomaticToggling();
             log.info("Manual override has not been set, automatic toggling continued");
         }
     }
 
+    private void restartAutomaticToggling() {
+        scheduledCheck.cancel(true);
+        setAutomaticTogglingInterval();
+        log.info("Automatic toggling restarted.");
+    }
+
     private void setAutomaticTogglingInterval() {
-        this.scheduledCheck = scheduledExecutorService.scheduleAtFixedRate(this, 10, 10, TimeUnit.SECONDS);
+        this.scheduledCheck = scheduledExecutorService.scheduleAtFixedRate(this, 10, 20, TimeUnit.SECONDS);
     }
 
     private boolean isOverridden(OverrideStatus overrideStatus) {
