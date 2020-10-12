@@ -62,13 +62,13 @@ public class AutomaticPumpToggler implements Observer, Runnable {
     @Override
     public void run() {
         double ambientTemperature = 0;
+
         try {
             ambientTemperature = this.ambientTemperatureReader.readTemperature();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
+
         if (ambientTemperature < this.turnOffTemperature) {
             log.info("(Automatic toggler) determined that pump be put off");
             PumpToggler.turnOffPump();
