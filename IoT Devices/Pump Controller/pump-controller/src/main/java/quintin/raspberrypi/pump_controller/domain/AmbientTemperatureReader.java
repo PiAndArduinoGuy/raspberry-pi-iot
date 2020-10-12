@@ -1,58 +1,51 @@
 package quintin.raspberrypi.pump_controller.domain;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import com.pi4j.io.spi.SpiChannel;
-import com.pi4j.io.spi.SpiDevice;
-import com.pi4j.io.spi.SpiFactory;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AmbientTemperatureReader {
 
     private static final double SERIES_RESISTANCE = 2700.0;
-    private static final short TEMPERATURE_SENSOR_CHANNEL = 0;
     private static final double THERMISTOR_NOMINAL_RESISTANCE = 1000.0;
     private static final double NOMINAL_TEMPERATURE = 25.0;
     private static final double B_COEFFICIENT = 3950.0;
-    private static SpiDevice spi;
 
-    static {
-        try {
-            spi = SpiFactory.getInstance(SpiChannel.CS0,
-                    SpiDevice.DEFAULT_SPI_SPEED, // default spi speed 1 MHz
-                    SpiDevice.DEFAULT_SPI_MODE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static double readTemperature() throws IOException, InterruptedException {
+    public static double readTemperature() throws IOException {
         log.info("(RaspberryPi) Attempting to read temperature");
-        double adcThermistorVoltage = getAdcVoltageOfThermistor(TEMPERATURE_SENSOR_CHANNEL);
+        double adcThermistorVoltage = getAdcVoltageOfThermistor();
         double thermistorResistance = getThermistorResistanceFromAdcVoltage(adcThermistorVoltage);
         return getTemperatureFromThermistorResistance(thermistorResistance);
     }
 
-    private static double getAdcVoltageOfThermistor(short channel) throws IOException {
+    private static double getAdcVoltageOfThermistor() throws IOException {
+        ProcessBuilder processBuilder = new ProcessBuilder("python2", resolvePythonScriptPath());
+        processBuilder.redirectErrorStream(true);
 
-        // create a data buffer and initialize a conversion request payload
-        byte data[] = new byte[]{
-                (byte) 0b00000001,
-                // first byte, start bit
-                (byte) (0b10000000 | (((channel & 7) << 4))),    // second byte transmitted -> (SGL/DIF = 1, D2=D1=D0=0)
-                (byte) 0b00000000                               // third byte transmitted....don't care
-        };
+        Process process = processBuilder.start();
+        List<String> results = readProcessOutput(process.getInputStream());
+        log.debug(String.format("ADC value from python script: %s", results.get(0)));
+        return Double.parseDouble(results.get(0));
 
-        // send conversion request to ADC chip via SPI channel
-        byte[] result = spi.write(data);
+    }
 
-        // calculate and return conversion value from result bytes
-        int adc = (result[1] << 8) & 0b1100000000; //merge data[1] & data[2] to get 10-bit result
-        adc |= (result[2] & 0xff);
-        log.debug(String.format("(RaspberryPi) Thermistor digital voltage reading: %s", adc));
-        return adc;
+    private static String resolvePythonScriptPath() {
+        File file = new File("/home/pi/Desktop/mcp3002_adc_value.py");
+        return file.getAbsolutePath();
+    }
 
+    private static List<String> readProcessOutput(InputStream inputStream) throws IOException {
+        try (BufferedReader output = new BufferedReader(new InputStreamReader(inputStream))) {
+            return output.lines()
+                    .collect(Collectors.toList());
+        }
     }
 
     private static double getTemperatureFromThermistorResistance(final double thermistorResistance) {
@@ -76,7 +69,7 @@ public class AmbientTemperatureReader {
 
     private static double getThermistorResistanceFromAdcVoltage(final double conversion_value) {
         double thermistorResistance = (SERIES_RESISTANCE) / ((1023.0 / conversion_value) - 1.0);
-        log.debug(String.format("(RaspberryPi) Thermistor resistance: %s", thermistorResistance));
+        log.info(String.format("(RaspberryPi) Thermistor resistance: %s", thermistorResistance));
         return thermistorResistance;
     }
 
