@@ -91,13 +91,23 @@
 
 	\section{MCP3002} % (fold)
 	\label{sec:mcp3002}
-	Image added to illustrate pip package to read MCP3002. Talk about how we can create a python script that we can use to read temp for time being (until atleast we get java code from pi4j than can read MCP3002 ADC values).
+	The pip gpiozero package was used to read the ADC value obtained by the MCP3002 \href{https://gpiozero.readthedocs.io/en/stable/api_spi.html}{API - SPI Devices}. There simply was not code online to run the java version using pi4j and so I had to revert to this option. A number of ways exist to read and execute a python script as listed by this \href{https://www.baeldung.com/java-working-with-python}{Baeldung} tutorial. The ProcessBuilder class was the option that was opted for to execute the mcp3002\_adc\_value.py script which was also saved to the resources folder of the pump-controller project for history purposes. To read the code the following script was generated 
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{images/mcp3002_gpiozero_code_read_adc.png}
+	\caption{Terminal Code :)}	
+	\end{figure}
+
+
 	
 	% section mcp3002 (end)
 
-	\section{Earthing} % (fold)
-	\label{sec:earthing}
-	Earthing of GND connection on pi zero to solve hanging voltage on ground line that results in relay not toggling
+	\section{MCP3002 and Thermistor Results}
+	There exists a (roughly) $2.5$ degrees celsius error between the converted MCP3002 ADC obtained temperature and the true reading of the temperature.
+
+	\section{Ground} % (fold)
+	\label{sec:ground}
+	The RaspberryPi grounds may have some noise on them. To check this simply connect your multimeter to the various ground points of the RaspberryPi. The voltage between the grounds must be 0. If this is not the case then its time to play the illimunation game to determine which ground gives a voltage other than 0. The culprit will be the one prone to noise. Simply use another ground on the RaspberryPi. 
 	
 	% section earthing (end)
 
