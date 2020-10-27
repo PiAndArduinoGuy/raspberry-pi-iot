@@ -4,6 +4,17 @@
   <meta charset="utf-8">
   <title>RaspberryPiControlHubUi</title>
   <base href="/">
+  <script type="text/javascript">
+    /* Script used to set the baseUrl to query backend for either the dev or prod environment */
+    var baseUrl = "http://localhost:8080/control-hub-backend"
+
+    var baseUrl = "http://localhost:8080"
+    /*
+    "http://localhost:8080/control-hub-backend" -> prod environment
+    "http://localhost:8080/" -> dev environment
+     */
+    window.baseUrl = baseUrl;
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>

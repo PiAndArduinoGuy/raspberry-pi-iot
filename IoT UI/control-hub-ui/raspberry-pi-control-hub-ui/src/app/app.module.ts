@@ -12,7 +12,7 @@ import { OptionsComponent } from './pool-pump-controller/options/options.compone
 import {HttpClient, HttpClientModule} from '@angular/common/http';
 
 const routes: Route[] = [
-  {path: '', component: HomeComponent},
+  {path: 'control-hub-frontend', component: HomeComponent},
   {path: 'pool-pump-controller', component: PoolPumpControllerComponent, children: [
       {path: '', component: OptionsComponent},
       {path: 'edit-configuration', component: ConfigurationEditComponent}
