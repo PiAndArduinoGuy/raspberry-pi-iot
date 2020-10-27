@@ -5,17 +5,18 @@ import {OverrideStatusEnum} from './override-status.enum';
 
 @Injectable({providedIn: 'root'})
 export class BackendHttpRequestsService {
+  private baseUrl = window['baseUrl'];
 
   constructor(private http: HttpClient) {
   }
 
   getPumpConfiguration() {
-    return this.http.get<PumpConfigModel>('http://localhost:8080/pump-configuration');
+    return this.http.get<PumpConfigModel>(this.baseUrl + '/pump-configuration');
   }
 
   saveNewPumpConfig(newPumpConfig: PumpConfigModel){
 
-    this.http.post('http://localhost:8080/pump-configuration/new', newPumpConfig).subscribe(response => {
+    this.http.post(this.baseUrl + '/pump-configuration/new', newPumpConfig).subscribe(response => {
       console.log(response);
     }, error => {
       console.log(error);
