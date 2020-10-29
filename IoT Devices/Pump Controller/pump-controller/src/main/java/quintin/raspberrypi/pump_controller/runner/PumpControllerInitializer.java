@@ -5,7 +5,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +23,12 @@ public class PumpControllerInitializer implements CommandLineRunner {
     private PumpConfig pumpConfig;
     private AutomaticPumpToggler automaticPumpToggler;
     private ManualPumpToggler manualPumpToggler;
+
+    @Value("${control-hub.host}")
+    private String controlHubHost;
+
+    @Value("${control-hub.port}")
+    private String controlHubPort;
 
     @Autowired
     public PumpControllerInitializer(PumpConfig pumpConfig,
@@ -42,7 +50,7 @@ public class PumpControllerInitializer implements CommandLineRunner {
 
 
     private void setInitialPumpConfig() {
-        ResponseEntity<PumpConfig> responseEntity = this.restTemplate.getForEntity("http://192.168.0.130:8080/control-hub-backend/pump-configuration", PumpConfig.class);
+        ResponseEntity<PumpConfig> responseEntity = this.restTemplate.getForEntity("http://" + controlHubHost + ":" + controlHubPort +"/control-hub-backend/pump-configuration", PumpConfig.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()){
             log.info(String.format("Initial pump config obtained - %s", responseEntity.getBody()));
             this.pumpConfig.setOverrideStatus(responseEntity.getBody().getOverrideStatus());

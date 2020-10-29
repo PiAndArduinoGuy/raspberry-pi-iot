@@ -11,3 +11,6 @@ spring:
         input:
           destination: pumpconfigupdate
 
+control-hub:
+  host: 192.168.0.130
+  port: 8080
