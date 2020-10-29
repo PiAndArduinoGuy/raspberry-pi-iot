@@ -24,7 +24,7 @@ public class UpdatedPumpConfig {
     @StreamListener(Sink.INPUT)
     public void sendPumpUpdateConfigToObservers(String msg){
         if(msg.equals("Pump configuration updated")){
-            ResponseEntity<PumpConfig> responseEntity = this.restTemplate.getForEntity("http://192.168.0.111:8080/pump-configuration", PumpConfig.class);
+            ResponseEntity<PumpConfig> responseEntity = this.restTemplate.getForEntity("http://192.168.0.130:8080/control-hub-backend/pump-configuration", PumpConfig.class);
             this.pumpConfig.setTurnOffTemp(responseEntity.getBody().getTurnOffTemp());
             this.pumpConfig.setOverrideStatus(responseEntity.getBody().getOverrideStatus());
             this.pumpConfig.notifyObservers(this.pumpConfig);
