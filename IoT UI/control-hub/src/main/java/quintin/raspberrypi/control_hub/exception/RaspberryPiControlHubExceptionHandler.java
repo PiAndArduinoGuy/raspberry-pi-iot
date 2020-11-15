@@ -30,7 +30,7 @@ public class RaspberryPiControlHubExceptionHandler {
     }
 
     @ExceptionHandler(TypeMismatchException.class)
-    public ResponseEntity<Problem> handleRuntimeException(TypeMismatchException e){
+    public ResponseEntity<Problem> handleTypeMisMatchException(TypeMismatchException e){
         Problem problem = new Problem();
         problem.setTitle(HttpStatus.BAD_REQUEST.getReasonPhrase());
         problem.setStatus(HttpStatus.BAD_REQUEST.value());

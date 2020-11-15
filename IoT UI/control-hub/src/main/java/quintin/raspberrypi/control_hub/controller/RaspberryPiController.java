@@ -1,13 +1,9 @@
 package quintin.raspberrypi.control_hub.controller;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +13,7 @@ import quintin.raspberrypi.control_hub.PumpConfig;
 import quintin.raspberrypi.control_hub.publisher.UpdatedPumpConfigPublisher;
 import quintin.raspberrypi.control_hub.service.PumpConfigService;
 
-import static quintin.raspberrypi.control_hub.controller.validation.PumpConfigValidation.validateTurnOffTemperature;
+import static quintin.raspberrypi.control_hub.controller.PumpConfigValidation.validateTurnOffTemperature;
 
 @RestController
 @CrossOrigin
