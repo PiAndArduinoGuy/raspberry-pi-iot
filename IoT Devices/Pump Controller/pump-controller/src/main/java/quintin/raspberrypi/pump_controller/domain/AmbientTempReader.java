@@ -1,31 +1,38 @@
 package quintin.raspberrypi.pump_controller.domain;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
-public class AmbientTemperatureReader {
+@Component
+public class AmbientTempReader {
 
     private static final double SERIES_RESISTANCE = 2700.0;
     private static final double THERMISTOR_NOMINAL_RESISTANCE = 1000.0;
     private static final double NOMINAL_TEMPERATURE = 25.0;
     private static final double B_COEFFICIENT = 3950.0;
 
-    public static double readTemperature() throws IOException {
-        log.info("(RaspberryPi) Attempting to read temperature");
-        double adcThermistorVoltage = getAdcVoltageOfThermistor();
+    @Value("${mcp3002.python-script.pi.location}")
+    private String mcp3002PythonScriptFileLocation;
+
+    public double readTemp(){
+        log.info("Attempting to read temperature");
+        double adcThermistorVoltage = 0;
+        try {
+            adcThermistorVoltage = getAdcVoltageOfThermistor();
+        } catch (IOException e) {
+            log.error("The script location is either wrong or the script does not exist", e);
+        }
         double thermistorResistance = getThermistorResistanceFromAdcVoltage(adcThermistorVoltage);
-        return getTemperatureFromThermistorResistance(thermistorResistance);
+        return getTempFromThermistorResistance(thermistorResistance);
     }
 
-    private static double getAdcVoltageOfThermistor() throws IOException {
+    private double getAdcVoltageOfThermistor() throws IOException {
         ProcessBuilder processBuilder = new ProcessBuilder("python2", resolvePythonScriptPath());
         processBuilder.redirectErrorStream(true);
 
@@ -36,8 +43,8 @@ public class AmbientTemperatureReader {
 
     }
 
-    private static String resolvePythonScriptPath() {
-        File file = new File("/home/pi/Desktop/mcp3002_adc_value.py");
+    private String resolvePythonScriptPath() {
+        File file = new File(this.mcp3002PythonScriptFileLocation);
         return file.getAbsolutePath();
     }
 
@@ -48,8 +55,8 @@ public class AmbientTemperatureReader {
         }
     }
 
-    private static double getTemperatureFromThermistorResistance(final double thermistorResistance) {
-        // perform B-parameter equation to get temperature from thermistor resistance
+    private static double getTempFromThermistorResistance(final double thermistorResistance) {
+        // perform B-parameter equation to get temp from thermistor resistance
         double oneOverB = (1 / B_COEFFICIENT);
         log.debug(String.format("oneOverB: %s", oneOverB));
         double thermResOverThermNomRes = (thermistorResistance / THERMISTOR_NOMINAL_RESISTANCE);
@@ -62,14 +69,14 @@ public class AmbientTemperatureReader {
         log.debug(String.format("inverseTempKelvin: %s", inverseTempKelvin));
         double recipInverseTempKelvin = 1 / inverseTempKelvin;
         log.debug(String.format("recipInverseTempKelvin: %s", recipInverseTempKelvin));
-        double temperature = (recipInverseTempKelvin - 273.15);
-        log.info(String.format("(RaspberryPi) Temperature: %s", temperature));
-        return temperature;
+        double temp = (recipInverseTempKelvin - 273.15);
+        log.info(String.format("Temperature: %s", temp));
+        return temp;
     }
 
     private static double getThermistorResistanceFromAdcVoltage(final double conversion_value) {
         double thermistorResistance = (SERIES_RESISTANCE) / ((1023.0 / conversion_value) - 1.0);
-        log.info(String.format("(RaspberryPi) Thermistor resistance: %s", thermistorResistance));
+        log.info(String.format("Thermistor resistance: %s", thermistorResistance));
         return thermistorResistance;
     }
 

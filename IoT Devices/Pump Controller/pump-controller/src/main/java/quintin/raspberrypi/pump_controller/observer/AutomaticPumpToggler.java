@@ -1,6 +1,12 @@
 package quintin.raspberrypi.pump_controller.observer;
 
-import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import quintin.raspberrypi.pump_controller.data.OverrideStatus;
+import quintin.raspberrypi.pump_controller.domain.AmbientTempReader;
+import quintin.raspberrypi.pump_controller.domain.PumpToggler;
+
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Executors;
@@ -8,41 +14,42 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import quintin.raspberrypi.pump_controller.data.OverrideStatus;
-import quintin.raspberrypi.pump_controller.data.PumpConfig;
-import quintin.raspberrypi.pump_controller.domain.AmbientTemperatureReader;
-import quintin.raspberrypi.pump_controller.domain.PumpToggler;
-
 @Slf4j
 @Component
 public class AutomaticPumpToggler implements Observer, Runnable {
 
-    private double turnOffTemperature;
+    private double turnOnTemp;
     private ScheduledFuture scheduledCheck;
     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-    private AmbientTemperatureReader ambientTemperatureReader;
+    private AmbientTempReader ambientTempReader;
+    private PumpToggler pumpToggler;
 
-    public AutomaticPumpToggler() throws IOException {
+    @Autowired
+    public AutomaticPumpToggler(PumpToggler pumpToggler, AmbientTempReader ambientTempReader) {
         this.setAutomaticTogglingInterval();
-        this.ambientTemperatureReader = new AmbientTemperatureReader();
+        this.ambientTempReader = ambientTempReader;
+        this.pumpToggler = pumpToggler;
     }
 
     @Override
-    public void update(final Observable observable, final Object updatedPumpConfig) {
-        log.info("(Automatic toggler) Updated received");
-        this.turnOffTemperature = ((PumpConfig) updatedPumpConfig).getTurnOffTemp();
-        if (isOverridden(((PumpConfig) updatedPumpConfig).getOverrideStatus())) {
-            this.scheduledCheck.cancel(true);
-            log.info("Manual override has been set, automatic toggling paused");
-        } else {
+    public void update(final Observable observable, final Object updatedPumpConfigAttribute) {
+        log.info("Update received");
+        // turn on temp was changed
+        if (updatedPumpConfigAttribute instanceof Double) {
+            this.turnOnTemp = (Double) updatedPumpConfigAttribute;
             if (scheduledCheck.isCancelled()) { // do not want another scheduler to run when initialized
                 setAutomaticTogglingInterval();
             }
             restartAutomaticToggling();
             log.info("Manual override has not been set, automatic toggling continued");
+        } else if (updatedPumpConfigAttribute instanceof OverrideStatus) { // override status has changed
+            OverrideStatus updatedOverrideStatus = (OverrideStatus) updatedPumpConfigAttribute;
+            if (isOverridden(updatedOverrideStatus)) {
+                this.scheduledCheck.cancel(true);
+                log.info("Manual override has been set, automatic toggling paused");
+            }
         }
+
     }
 
     private void restartAutomaticToggling() {
@@ -61,20 +68,16 @@ public class AutomaticPumpToggler implements Observer, Runnable {
 
     @Override
     public void run() {
-        double ambientTemperature = 0;
+        double ambientTemp = 0;
 
-        try {
-            ambientTemperature = this.ambientTemperatureReader.readTemperature();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ambientTemp = this.ambientTempReader.readTemp();
 
-        if (ambientTemperature < this.turnOffTemperature) {
+        if (ambientTemp < this.turnOnTemp) {
             log.info("(Automatic toggler) determined that pump be put off");
-            PumpToggler.turnOffPump();
-        } else if (ambientTemperature > this.turnOffTemperature) {
+            pumpToggler.turnOffPump();
+        } else if (ambientTemp > this.turnOnTemp) {
             log.info("(Automatic toggler) determined that pump be put on");
-            PumpToggler.turnOnPump();
+            pumpToggler.turnOnPump();
         }
     }
 
