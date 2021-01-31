@@ -13,7 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import quintin.raspberrypi.pump_controller.data.OverrideStatus;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
-import quintin.raspberrypi.pump_controller.observable.PumpOverrideObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,12 +21,12 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
-        PumpOverrideObservable.class,
+        PumpOverrideStatusObservable.class,
         ManualPumpToggler.class
 })
 public class ManualPumpTogglerUnitTest {
     @Autowired
-    private PumpOverrideObservable pumpOverrideObservable;
+    private PumpOverrideStatusObservable pumpOverrideStatusObservable;
 
     @SpyBean
     private ManualPumpToggler manualPumpToggler;
@@ -39,7 +39,7 @@ public class ManualPumpTogglerUnitTest {
 
     @BeforeEach
     void setUp(){
-        pumpOverrideObservable.addObserver(manualPumpToggler);
+        pumpOverrideStatusObservable.addObserver(manualPumpToggler);
     }
 
     @Test
@@ -48,8 +48,8 @@ public class ManualPumpTogglerUnitTest {
             "Then the ManualPumpToggler receives the updated OverrideStatus")
     void canReceiveUpdatedWhenOverrideStatusHasBeenChanged(){
         // When
-        pumpOverrideObservable.setOverrideStatus(OverrideStatus.NONE);
-        pumpOverrideObservable.notifyObservers(this.pumpOverrideObservable.getOverrideStatus());
+        pumpOverrideStatusObservable.setOverrideStatus(OverrideStatus.NONE);
+        pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
 
         // Then
         verify(manualPumpToggler).update(any(), overrideStatusCaptor.capture());
@@ -63,8 +63,8 @@ public class ManualPumpTogglerUnitTest {
             "Then the ManualPumpToggler invokes the turnOn() method of PumpToggler class")
     void canTurnPumpOnWhenOverrideStatusIsPUMP_ON(){
        // When
-        pumpOverrideObservable.setOverrideStatus(OverrideStatus.PUMP_ON);
-        pumpOverrideObservable.notifyObservers(this.pumpOverrideObservable.getOverrideStatus());
+        pumpOverrideStatusObservable.setOverrideStatus(OverrideStatus.PUMP_ON);
+        pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
 
         // Then
         verify(pumpToggler).turnOnPump();
@@ -77,8 +77,8 @@ public class ManualPumpTogglerUnitTest {
             "Then the ManualToggler invokes the turnOff() method of PumpToggler class")
     void canTurnPumpOffWhenOverrideStatusIsPUMP_OFF(){
         // When
-        pumpOverrideObservable.setOverrideStatus(OverrideStatus.PUMP_OFF);
-        pumpOverrideObservable.notifyObservers(this.pumpOverrideObservable.getOverrideStatus());
+        pumpOverrideStatusObservable.setOverrideStatus(OverrideStatus.PUMP_OFF);
+        pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
 
         // Then
         verify(pumpToggler).turnOffPump();

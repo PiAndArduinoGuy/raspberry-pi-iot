@@ -17,8 +17,8 @@ import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.domain.AmbientTempReader;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
 import quintin.raspberrypi.pump_controller.exception.PumpControllerException;
-import quintin.raspberrypi.pump_controller.observable.PumpOverrideObservable;
-import quintin.raspberrypi.pump_controller.observable.TurnOnTempObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 import quintin.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 import quintin.raspberrypi.pump_controller.observer.ManualPumpToggler;
 
@@ -36,8 +36,8 @@ import static org.mockito.Mockito.when;
         ControlHubRestTemplateConfig.class,
         AmbientTempReader.class,
         PumpToggler.class,
-        PumpOverrideObservable.class,
-        TurnOnTempObservable.class
+        PumpOverrideStatusObservable.class,
+        PumpTurnOnTempObservable.class
 })
 //@SpringBootTest
 class PumpControllerInitializerTest {
@@ -49,10 +49,10 @@ class PumpControllerInitializerTest {
     private RestTemplate controlHubBaseRestTemplate;
 
     @MockBean
-    private PumpOverrideObservable pumpOverrideObservableMock;
+    private PumpOverrideStatusObservable pumpOverrideStatusObservableMock;
 
     @MockBean
-    private TurnOnTempObservable turnOnTempObservableMock;
+    private PumpTurnOnTempObservable pumpTurnOnTempObservableMock;
 
     @Autowired
     private PumpControllerInitializer pumpControllerInitializer;
@@ -68,8 +68,8 @@ class PumpControllerInitializerTest {
 
         pumpControllerInitializer.run();
 
-        verify(pumpOverrideObservableMock).notifyObservers(any());
-        verify(turnOnTempObservableMock).notifyObservers(any());
+        verify(pumpOverrideStatusObservableMock).notifyObservers(any());
+        verify(pumpTurnOnTempObservableMock).notifyObservers(any());
 
     }
 

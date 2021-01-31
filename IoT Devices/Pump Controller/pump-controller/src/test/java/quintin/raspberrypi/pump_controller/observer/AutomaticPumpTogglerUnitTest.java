@@ -14,8 +14,8 @@ import quintin.raspberrypi.pump_controller.data.OverrideStatus;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.domain.AmbientTempReader;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
-import quintin.raspberrypi.pump_controller.observable.PumpOverrideObservable;
-import quintin.raspberrypi.pump_controller.observable.TurnOnTempObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -27,8 +27,8 @@ import static org.mockito.Mockito.*;
 @ContextConfiguration(classes = {
         AutomaticPumpToggler.class,
         PumpConfig.class,
-        TurnOnTempObservable.class,
-        PumpOverrideObservable.class,
+        PumpTurnOnTempObservable.class,
+        PumpOverrideStatusObservable.class,
         PumpToggler.class,
 })
 class AutomaticPumpTogglerUnitTest {
@@ -40,10 +40,10 @@ class AutomaticPumpTogglerUnitTest {
     private PumpConfig pumpConfig;
 
     @Autowired
-    private TurnOnTempObservable turnOnTempObservable;
+    private PumpTurnOnTempObservable pumpTurnOnTempObservable;
 
     @Autowired
-    private PumpOverrideObservable pumpOverrideObservable;
+    private PumpOverrideStatusObservable pumpOverrideStatusObservable;
 
     @SpyBean
     private AutomaticPumpToggler automaticPumpToggler;
@@ -72,12 +72,12 @@ class AutomaticPumpTogglerUnitTest {
         doNothing().when(pumpToggler).turnOffPump();
 
         // Given
-        turnOnTempObservable.addObserver(automaticPumpToggler);
-        pumpOverrideObservable.addObserver(automaticPumpToggler);
+        pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
+        pumpOverrideStatusObservable.addObserver(automaticPumpToggler);
 
         // When
-        turnOnTempObservable.setTurnOnTemp(20.00);
-        turnOnTempObservable.notifyObservers(this.turnOnTempObservable.getTurnOnTemp());
+        pumpTurnOnTempObservable.setTurnOnTemp(20.00);
+        pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
 
         // Then
         verify(automaticPumpToggler).update(any(), turnOnTempCaptor.capture());
@@ -97,12 +97,12 @@ class AutomaticPumpTogglerUnitTest {
         doNothing().when(pumpToggler).turnOffPump();
 
         // Given
-        turnOnTempObservable.addObserver(automaticPumpToggler);
-        pumpOverrideObservable.addObserver(automaticPumpToggler);
+        pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
+        pumpOverrideStatusObservable.addObserver(automaticPumpToggler);
 
         // When
-        pumpOverrideObservable.setOverrideStatus(OverrideStatus.PUMP_OFF);
-        pumpOverrideObservable.notifyObservers(this.pumpOverrideObservable.getOverrideStatus());
+        pumpOverrideStatusObservable.setOverrideStatus(OverrideStatus.PUMP_OFF);
+        pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
 
         // Then
         verify(automaticPumpToggler).update(any(), overrideStatusCaptor.capture());
@@ -119,9 +119,9 @@ class AutomaticPumpTogglerUnitTest {
     void canTurnOnPumpWhenAmbientTempMoreThanTurnOnTemp() throws Exception {
         // Given
         when(ambientTempReaderMock.readTemp()).thenReturn(25.00);
-        turnOnTempObservable.addObserver(automaticPumpToggler);
-        turnOnTempObservable.setTurnOnTemp(20.00);
-        turnOnTempObservable.notifyObservers(this.turnOnTempObservable.getTurnOnTemp());
+        pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
+        pumpTurnOnTempObservable.setTurnOnTemp(20.00);
+        pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
         Thread.sleep(11000); // run method is only invoked after 10 seconds according to scheduledExecutorService.scheduleAtFixedRate method
 
         // Then
@@ -138,9 +138,9 @@ class AutomaticPumpTogglerUnitTest {
     void canTurnOffPumpWhenAmbientTempLessThanTurnOnTemp() throws Exception {
         // Given
         when(ambientTempReaderMock.readTemp()).thenReturn(25.00);
-        turnOnTempObservable.addObserver(automaticPumpToggler);
-        turnOnTempObservable.setTurnOnTemp(26.00);
-        turnOnTempObservable.notifyObservers(this.turnOnTempObservable.getTurnOnTemp());
+        pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
+        pumpTurnOnTempObservable.setTurnOnTemp(26.00);
+        pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
         Thread.sleep(11000); // run method is only invoked after 10 seconds according to scheduledExecutorService.scheduleAtFixedRate method
 
         // Then

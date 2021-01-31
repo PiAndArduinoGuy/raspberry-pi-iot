@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.exception.PumpControllerException;
-import quintin.raspberrypi.pump_controller.observable.PumpOverrideObservable;
-import quintin.raspberrypi.pump_controller.observable.TurnOnTempObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 import quintin.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 import quintin.raspberrypi.pump_controller.observer.ManualPumpToggler;
 
@@ -17,21 +17,21 @@ import quintin.raspberrypi.pump_controller.observer.ManualPumpToggler;
 @Component
 public class PumpControllerInitializer implements CommandLineRunner {
     private RestTemplate controlHubBaseRestTemplate;
-    private final PumpOverrideObservable pumpOverrideObservable;
-    private final TurnOnTempObservable turnOnTempObservable;
+    private final PumpOverrideStatusObservable pumpOverrideStatusObservable;
+    private final PumpTurnOnTempObservable pumpTurnOnTempObservable;
 
 
     @Autowired
     public PumpControllerInitializer(AutomaticPumpToggler automaticPumpToggler,
                                      ManualPumpToggler manualPumpToggler,
-                                     PumpOverrideObservable pumpOverrideObservable,
-                                     TurnOnTempObservable turnOnTempObservable,
+                                     PumpOverrideStatusObservable pumpOverrideStatusObservable,
+                                     PumpTurnOnTempObservable pumpTurnOnTempObservable,
                                      RestTemplate controlHubBaseRestTemplate) {
         this.controlHubBaseRestTemplate = controlHubBaseRestTemplate;
-        this.pumpOverrideObservable = pumpOverrideObservable;
-        this.turnOnTempObservable = turnOnTempObservable;
-        this.turnOnTempObservable.addObserver(automaticPumpToggler);
-        this.pumpOverrideObservable.addObserver(manualPumpToggler);
+        this.pumpOverrideStatusObservable = pumpOverrideStatusObservable;
+        this.pumpTurnOnTempObservable = pumpTurnOnTempObservable;
+        this.pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
+        this.pumpOverrideStatusObservable.addObserver(manualPumpToggler);
 
     }
 
@@ -46,10 +46,10 @@ public class PumpControllerInitializer implements CommandLineRunner {
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
             PumpConfig initialPumpConfig = (PumpConfig) responseEntity.getBody();
             log.info(String.format("Initial pump config obtained - %s", initialPumpConfig));
-            this.pumpOverrideObservable.setOverrideStatus(initialPumpConfig.getOverrideStatus());
-            this.pumpOverrideObservable.notifyObservers(this.pumpOverrideObservable.getOverrideStatus());
-            this.turnOnTempObservable.setTurnOnTemp(initialPumpConfig.getTurnOnTemp());
-            this.turnOnTempObservable.notifyObservers(this.turnOnTempObservable.getTurnOnTemp());
+            this.pumpOverrideStatusObservable.setOverrideStatus(initialPumpConfig.getOverrideStatus());
+            this.pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
+            this.pumpTurnOnTempObservable.setTurnOnTemp(initialPumpConfig.getTurnOnTemp());
+            this.pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
         } else {
             PumpControllerException pumpControllerException = new PumpControllerException(String.format("The updated pump config could not be retrieved from the control hub, the response was: %s", responseEntity.getBody().toString()));
             log.error("A response other than 2xx was received from the control hub.", pumpControllerException);

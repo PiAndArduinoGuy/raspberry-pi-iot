@@ -20,8 +20,8 @@ import quintin.raspberrypi.pump_controller.data.Problem;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.domain.AmbientTempReader;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
-import quintin.raspberrypi.pump_controller.observable.PumpOverrideObservable;
-import quintin.raspberrypi.pump_controller.observable.TurnOnTempObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 import quintin.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 import quintin.raspberrypi.pump_controller.observer.ManualPumpToggler;
 import quintin.raspberrypi.pump_controller.runner.PumpControllerInitializer;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-class UpdatedPumpConfigUnitTest {
+class UpdatedPumpConfigSubscriberUnitTest {
 
     @Autowired
     private Sink binding;
@@ -47,7 +47,7 @@ class UpdatedPumpConfigUnitTest {
     private MessageCollector messageCollector;
 
     @Autowired
-    private PumpOverrideObservable pumpOverrideObservable;
+    private PumpOverrideStatusObservable pumpOverrideStatusObservable;
 
     @MockBean
     private AutomaticPumpToggler automaticPumpToggler;
@@ -56,7 +56,7 @@ class UpdatedPumpConfigUnitTest {
     private ManualPumpToggler manualPumpToggler;
 
     @Autowired
-    private TurnOnTempObservable turnOnTempObservable;
+    private PumpTurnOnTempObservable pumpTurnOnTempObservable;
 
     @MockBean
     private AmbientTempReader ambientTempReader;
@@ -71,7 +71,7 @@ class UpdatedPumpConfigUnitTest {
     private PumpToggler pumpToggler;
 
     @SpyBean
-    private UpdatedPumpConfig updatedPumpConfig;
+    private UpdatedPumpConfigSubscriber updatedPumpConfigSubscriber;
 
     @Captor
     ArgumentCaptor<String> messageCaptor;
@@ -89,7 +89,7 @@ class UpdatedPumpConfigUnitTest {
         binding.input().send(MessageBuilder.withPayload("Pump configuration updated").build());
 
         // Then
-        verify(updatedPumpConfig).sendPumpUpdateConfigToObservers(messageCaptor.capture());
+        verify(updatedPumpConfigSubscriber).sendPumpUpdateConfigToObservers(messageCaptor.capture());
         String receivedMessage = messageCaptor.getValue();
         assertThat(receivedMessage).isEqualToIgnoringCase("Pump configuration updated");
     }
@@ -114,8 +114,8 @@ class UpdatedPumpConfigUnitTest {
         mockPumpConfigResponse.setOverrideStatus(OverrideStatus.NONE);
         when(mockControlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class))
                 .thenReturn(new ResponseEntity<>(mockPumpConfigResponse, HttpStatus.OK));
-        pumpOverrideObservable.addObserver(automaticPumpToggler);
-        pumpOverrideObservable.addObserver(manualPumpToggler);
+        pumpOverrideStatusObservable.addObserver(automaticPumpToggler);
+        pumpOverrideStatusObservable.addObserver(manualPumpToggler);
 
         // When
         binding.input().send(MessageBuilder.withPayload("Pump configuration updated").build());
@@ -135,7 +135,7 @@ class UpdatedPumpConfigUnitTest {
         mockPumpConfigResponse.setTurnOnTemp(20.00);
         when(mockControlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class))
                 .thenReturn(new ResponseEntity<>(mockPumpConfigResponse, HttpStatus.OK));
-        turnOnTempObservable.addObserver(automaticPumpToggler);
+        pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
 
         // When
         binding.input().send(MessageBuilder.withPayload("Pump configuration updated").build());

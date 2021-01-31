@@ -8,7 +8,7 @@ import java.util.Observable;
 
 @Component
 @Getter
-public class PumpOverrideObservable extends Observable {
+public class PumpOverrideStatusObservable extends Observable {
     private OverrideStatus overrideStatus;
 
     public void setOverrideStatus(OverrideStatus overrideStatus) {

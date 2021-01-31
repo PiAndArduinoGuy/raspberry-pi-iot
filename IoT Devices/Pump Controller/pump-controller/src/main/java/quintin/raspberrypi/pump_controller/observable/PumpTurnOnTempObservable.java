@@ -7,7 +7,7 @@ import java.util.Observable;
 
 @Component
 @Getter
-public class TurnOnTempObservable extends Observable {
+public class PumpTurnOnTempObservable extends Observable {
     private double turnOnTemp;
 
     public void setTurnOnTemp(double turnOnTemp) {

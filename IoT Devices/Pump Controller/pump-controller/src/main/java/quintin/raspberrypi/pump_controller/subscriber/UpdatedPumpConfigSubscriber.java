@@ -9,23 +9,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.exception.PumpControllerException;
-import quintin.raspberrypi.pump_controller.observable.PumpOverrideObservable;
-import quintin.raspberrypi.pump_controller.observable.TurnOnTempObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 
 @Slf4j
 @EnableBinding(Sink.class)
-public class UpdatedPumpConfig {
+public class UpdatedPumpConfigSubscriber {
     private RestTemplate restTemplate;
     private PumpConfig pumpConfig;
-    private PumpOverrideObservable pumpOverrideObservable;
-    private TurnOnTempObservable turnOnTempObservable;
+    private PumpOverrideStatusObservable pumpOverrideStatusObservable;
+    private PumpTurnOnTempObservable pumpTurnOnTempObservable;
 
     @Autowired
-    public UpdatedPumpConfig(PumpConfig pumpConfig, RestTemplate controlHubBaseRestTemplate, TurnOnTempObservable turnOnTempObservable, PumpOverrideObservable pumpOverrideObservable) {
+    public UpdatedPumpConfigSubscriber(PumpConfig pumpConfig, RestTemplate controlHubBaseRestTemplate, PumpTurnOnTempObservable pumpTurnOnTempObservable, PumpOverrideStatusObservable pumpOverrideStatusObservable) {
         this.restTemplate = controlHubBaseRestTemplate;
         this.pumpConfig = pumpConfig;
-        this.turnOnTempObservable = turnOnTempObservable;
-        this.pumpOverrideObservable = pumpOverrideObservable;
+        this.pumpTurnOnTempObservable = pumpTurnOnTempObservable;
+        this.pumpOverrideStatusObservable = pumpOverrideStatusObservable;
     }
 
     @StreamListener(Sink.INPUT)
@@ -58,12 +58,12 @@ public class UpdatedPumpConfig {
     private void notifyRelevantObserverOfPumpConfigAttributeChange(PumpConfig updatedPumpConfig) {
         if (hasOverrideStatusChanged(updatedPumpConfig)) {
             log.info("The override status has been updated.");
-            this.pumpOverrideObservable.setOverrideStatus(updatedPumpConfig.getOverrideStatus());
-            this.pumpOverrideObservable.notifyObservers(this.pumpOverrideObservable.getOverrideStatus());
+            this.pumpOverrideStatusObservable.setOverrideStatus(updatedPumpConfig.getOverrideStatus());
+            this.pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
         } else {
             log.info("The turn on temperature has been updated.");
-            this.turnOnTempObservable.setTurnOnTemp(updatedPumpConfig.getTurnOnTemp());
-            this.turnOnTempObservable.notifyObservers(this.turnOnTempObservable.getTurnOnTemp());
+            this.pumpTurnOnTempObservable.setTurnOnTemp(updatedPumpConfig.getTurnOnTemp());
+            this.pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
         }
     }
 
