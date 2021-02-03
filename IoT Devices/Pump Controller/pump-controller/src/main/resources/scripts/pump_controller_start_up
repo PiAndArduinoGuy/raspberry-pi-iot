@@ -1,0 +1,3 @@
+#!/bin/bash
+
+java -jar /home/pi/Desktop/pump-controller-1.0-SNAPSHOT-spring-boot.jar &

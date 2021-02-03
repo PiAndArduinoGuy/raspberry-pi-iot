@@ -1,0 +1,4 @@
+#!/bin/bash
+
+docker start some-rabbit # start the rabbit-mq container to facilitate communication between the control-hub and other IoT devices
+/home/pi/Desktop/apache-tomcat-control-hub-server/bin/startup.sh # start the web host
