@@ -21,3 +21,12 @@ mcp3002:
   python-script:
     pi:
       location: "/home/pi/Desktop/mcp3002_adc_value.py"
+
+scheduler:
+  delay-seconds: 10
+  rate-seconds: 20
+
+ambient-temp-reader:
+  scheduler:
+    delay-seconds: 10
+    rate-seconds: 20

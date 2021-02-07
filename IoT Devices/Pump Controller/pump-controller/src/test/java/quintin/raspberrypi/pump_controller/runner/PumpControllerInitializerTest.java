@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
 import quintin.raspberrypi.pump_controller.config.ControlHubRestTemplateConfig;
@@ -17,6 +18,7 @@ import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.domain.AmbientTempReader;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
 import quintin.raspberrypi.pump_controller.exception.PumpControllerException;
+import quintin.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
 import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
 import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 import quintin.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
@@ -37,9 +39,10 @@ import static org.mockito.Mockito.when;
         AmbientTempReader.class,
         PumpToggler.class,
         PumpOverrideStatusObservable.class,
-        PumpTurnOnTempObservable.class
+        PumpTurnOnTempObservable.class,
+        NewAmbientTempReadingObservable.class
 })
-//@SpringBootTest
+@TestPropertySource("classpath:application-test.properties")
 class PumpControllerInitializerTest {
 
     @MockBean

@@ -1,26 +1,57 @@
 package quintin.raspberrypi.pump_controller.domain;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import quintin.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
+import quintin.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 
+import javax.annotation.PostConstruct;
 import java.io.*;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class AmbientTempReader {
+public class AmbientTempReader implements Runnable {
 
     private static final double SERIES_RESISTANCE = 2700.0;
     private static final double THERMISTOR_NOMINAL_RESISTANCE = 1000.0;
     private static final double NOMINAL_TEMPERATURE = 25.0;
     private static final double B_COEFFICIENT = 3950.0;
 
+    private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+    private final NewAmbientTempReadingObservable newAmbientTempReadingObservable;
+
     @Value("${mcp3002.python-script.pi.location}")
     private String mcp3002PythonScriptFileLocation;
 
-    public double readTemp(){
+    @Value("${ambient-temp-reader.scheduler.delay-seconds}")
+    private Long delay;
+
+    @Value("${ambient-temp-reader.scheduler.rate-seconds}")
+    private Long rate;
+
+    @Autowired
+    public AmbientTempReader(AutomaticPumpToggler automaticPumpToggler, NewAmbientTempReadingObservable newAmbientTempReadingObservable) {
+        this.newAmbientTempReadingObservable = newAmbientTempReadingObservable;
+        this.newAmbientTempReadingObservable.addObserver(automaticPumpToggler);
+    }
+
+    @PostConstruct
+    private void setAmbientTempReaderInterval() {
+        this.scheduledExecutorService.scheduleAtFixedRate(
+                this,
+                delay,
+                rate,
+                TimeUnit.SECONDS);
+    }
+
+    private void getAmbientTempAndNotifyObservers() {
         log.info("Attempting to read temperature");
         double adcThermistorVoltage = 0;
         try {
@@ -29,7 +60,8 @@ public class AmbientTempReader {
             log.error("The script location is either wrong or the script does not exist", e);
         }
         double thermistorResistance = getThermistorResistanceFromAdcVoltage(adcThermistorVoltage);
-        return getTempFromThermistorResistance(thermistorResistance);
+        this.newAmbientTempReadingObservable.setTemp(getTempFromThermistorResistance(thermistorResistance));
+        this.newAmbientTempReadingObservable.notifyObservers(this.newAmbientTempReadingObservable.getTempReading());
     }
 
     private double getAdcVoltageOfThermistor() throws IOException {
@@ -80,4 +112,8 @@ public class AmbientTempReader {
         return thermistorResistance;
     }
 
+    @Override
+    public void run() {
+        getAmbientTempAndNotifyObservers();
+    }
 }

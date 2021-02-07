@@ -2,11 +2,17 @@ package quintin.raspberrypi.pump_controller.observer;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import quintin.raspberrypi.pump_controller.data.OverrideStatus;
-import quintin.raspberrypi.pump_controller.domain.AmbientTempReader;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
+import quintin.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
+import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Executors;
@@ -21,29 +27,34 @@ public class AutomaticPumpToggler implements Observer, Runnable {
     private double turnOnTemp;
     private ScheduledFuture scheduledCheck;
     private ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-    private AmbientTempReader ambientTempReader;
     private PumpToggler pumpToggler;
+    private final List<Double> ambientTempReadingsOverCheckInterval;
+
+    @Value("${scheduler.delay-seconds}")
+    private Long schedulerDelaySeconds;
+    @Value("${scheduler.rate-seconds}")
+    private Long schedulerRateSeconds;
 
     @Autowired
-    public AutomaticPumpToggler(PumpToggler pumpToggler, AmbientTempReader ambientTempReader) {
-        this.setAutomaticTogglingInterval();
-        this.ambientTempReader = ambientTempReader;
+    public AutomaticPumpToggler(PumpToggler pumpToggler) {
         this.pumpToggler = pumpToggler;
+        this.ambientTempReadingsOverCheckInterval = new ArrayList<>();
     }
 
     @Override
-    public void update(final Observable observable, final Object updatedPumpConfigAttribute) {
+    public void update(final Observable observable, final Object updatedAttribute) {
         log.info("Update received");
-        // turn on temp was changed
-        if (updatedPumpConfigAttribute instanceof Double) {
-            this.turnOnTemp = (Double) updatedPumpConfigAttribute;
+        if (observable instanceof NewAmbientTempReadingObservable) {
+            ambientTempReadingsOverCheckInterval.add((Double) updatedAttribute);
+        } else if (observable instanceof PumpTurnOnTempObservable) {
+            this.turnOnTemp = (Double) updatedAttribute;
             if (scheduledCheck.isCancelled()) { // do not want another scheduler to run when initialized
-                setAutomaticTogglingInterval();
+                setAutomaticTogglingCheckInterval();
             }
             restartAutomaticToggling();
             log.info("Manual override has not been set, automatic toggling continued");
-        } else if (updatedPumpConfigAttribute instanceof OverrideStatus) { // override status has changed
-            OverrideStatus updatedOverrideStatus = (OverrideStatus) updatedPumpConfigAttribute;
+        } else if (observable instanceof PumpOverrideStatusObservable) {
+            OverrideStatus updatedOverrideStatus = (OverrideStatus) updatedAttribute;
             if (isOverridden(updatedOverrideStatus)) {
                 this.scheduledCheck.cancel(true);
                 log.info("Manual override has been set, automatic toggling paused");
@@ -54,12 +65,17 @@ public class AutomaticPumpToggler implements Observer, Runnable {
 
     private void restartAutomaticToggling() {
         scheduledCheck.cancel(true);
-        setAutomaticTogglingInterval();
+        setAutomaticTogglingCheckInterval();
         log.info("Automatic toggling restarted.");
     }
 
-    private void setAutomaticTogglingInterval() {
-        this.scheduledCheck = scheduledExecutorService.scheduleAtFixedRate(this, 10, 20, TimeUnit.SECONDS);
+    @PostConstruct
+    private void setAutomaticTogglingCheckInterval() {
+        this.scheduledCheck = scheduledExecutorService.scheduleAtFixedRate(
+                this,
+                schedulerDelaySeconds,
+                schedulerRateSeconds,
+                TimeUnit.SECONDS);
     }
 
     private boolean isOverridden(OverrideStatus overrideStatus) {
@@ -68,17 +84,31 @@ public class AutomaticPumpToggler implements Observer, Runnable {
 
     @Override
     public void run() {
-        double ambientTemp = 0;
+        if (ambientTempReadingsOverCheckInterval.size() == 5){
+            togglePumpBasedOnAverage(getAverageAmbientTempOverInterval());
+            this.ambientTempReadingsOverCheckInterval.clear();
+        }
+    }
 
-        ambientTemp = this.ambientTempReader.readTemp();
+    private double getAverageAmbientTempOverInterval() {
+        double averageAmbientTempOverFifteenMins =
+                ambientTempReadingsOverCheckInterval
+                        .stream()
+                        .mapToDouble(Double::doubleValue)
+                        .average()
+                        .getAsDouble();
 
-        if (ambientTemp < this.turnOnTemp) {
+        log.info(String.format("The average temperature was measured to be %f", averageAmbientTempOverFifteenMins));
+        return averageAmbientTempOverFifteenMins;
+    }
+
+    private void togglePumpBasedOnAverage(double averageAmbientTempOverFifteenMins) {
+        if (averageAmbientTempOverFifteenMins < this.turnOnTemp) {
             log.info("(Automatic toggler) determined that pump be put off");
             pumpToggler.turnOffPump();
-        } else if (ambientTemp > this.turnOnTemp) {
+        } else if (averageAmbientTempOverFifteenMins > this.turnOnTemp) {
             log.info("(Automatic toggler) determined that pump be put on");
             pumpToggler.turnOnPump();
         }
     }
-
 }
