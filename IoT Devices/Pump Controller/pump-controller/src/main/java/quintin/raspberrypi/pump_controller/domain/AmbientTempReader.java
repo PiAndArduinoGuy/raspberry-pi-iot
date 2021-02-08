@@ -61,7 +61,6 @@ public class AmbientTempReader implements Runnable {
         }
         double thermistorResistance = getThermistorResistanceFromAdcVoltage(adcThermistorVoltage);
         this.newAmbientTempReadingObservable.setTemp(getTempFromThermistorResistance(thermistorResistance));
-        this.newAmbientTempReadingObservable.notifyObservers(this.newAmbientTempReadingObservable.getTempReading());
     }
 
     private double getAdcVoltageOfThermistor() throws IOException {

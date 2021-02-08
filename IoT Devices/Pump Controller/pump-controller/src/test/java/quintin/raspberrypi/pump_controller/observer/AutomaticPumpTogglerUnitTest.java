@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AutomaticPumpTogglerUnitTest {
 
@@ -78,7 +77,6 @@ class AutomaticPumpTogglerUnitTest {
     )
     @Test
     void canNotifyAutomaticPumpTogglerOfTurnOnTemperatureChange() {
-        doNothing().when(automaticPumpToggler).run();
         doNothing().when(pumpToggler).turnOnPump();
         doNothing().when(pumpToggler).turnOffPump();
 
@@ -87,7 +85,6 @@ class AutomaticPumpTogglerUnitTest {
 
         // When
         pumpTurnOnTempObservable.setTurnOnTemp(20.00);
-        pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
 
         // Then
         verify(automaticPumpToggler).update(any(PumpTurnOnTempObservable.class), turnOnTempCaptor.capture());
@@ -102,7 +99,6 @@ class AutomaticPumpTogglerUnitTest {
     )
     @Test
     void canNotifyAutomaticPumpTogglerOfManualOverride() {
-        doNothing().when(automaticPumpToggler).run();
         doNothing().when(pumpToggler).turnOnPump();
         doNothing().when(pumpToggler).turnOffPump();
 
@@ -111,7 +107,6 @@ class AutomaticPumpTogglerUnitTest {
 
         // When
         pumpOverrideStatusObservable.setOverrideStatus(OverrideStatus.PUMP_OFF);
-        pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
 
         // Then
         verify(automaticPumpToggler).update(any(PumpOverrideStatusObservable.class), overrideStatusCaptor.capture());
@@ -130,7 +125,6 @@ class AutomaticPumpTogglerUnitTest {
 
         // When
         newAmbientTempReadingObservable.setTemp(10.00);
-        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
 
         // Then
         verify(automaticPumpToggler).update(any(NewAmbientTempReadingObservable.class), newAmbientTempReadingCaptor.capture());
@@ -148,7 +142,6 @@ class AutomaticPumpTogglerUnitTest {
 
         // When
         newAmbientTempReadingObservable.setTemp(10.00);
-        newAmbientTempReadingObservable.notifyObservers(10.00);
 
         // Then
         verify(automaticPumpToggler).update(any(NewAmbientTempReadingObservable.class),any(Double.class));
@@ -164,7 +157,7 @@ class AutomaticPumpTogglerUnitTest {
         simulateFiveGreaterThan30AmbientTempReadings();
 
         verify(automaticPumpToggler, atMost(6)).update(any(),any()); // additional call is for turnOnTempObservable
-        verify(pumpToggler, timeout(7000)).turnOnPump();
+        verify(pumpToggler).turnOnPump();
     }
 
     @Test
@@ -177,7 +170,7 @@ class AutomaticPumpTogglerUnitTest {
         simulateFiveLessThan30AmbientTempReadings();
 
         verify(automaticPumpToggler, atMost(6)).update(any(),any()); // additional call is for turnOnTempObservable
-        verify(pumpToggler, timeout(7000)).turnOffPump();
+        verify(pumpToggler).turnOffPump();
     }
 
     private void simulateFiveGreaterThan30AmbientTempReadings() {

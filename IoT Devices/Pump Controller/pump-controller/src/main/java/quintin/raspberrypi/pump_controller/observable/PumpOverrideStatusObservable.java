@@ -14,5 +14,6 @@ public class PumpOverrideStatusObservable extends Observable {
     public void setOverrideStatus(OverrideStatus overrideStatus) {
         this.overrideStatus = overrideStatus;
         this.setChanged();
+        this.notifyObservers(overrideStatus);
     }
 }

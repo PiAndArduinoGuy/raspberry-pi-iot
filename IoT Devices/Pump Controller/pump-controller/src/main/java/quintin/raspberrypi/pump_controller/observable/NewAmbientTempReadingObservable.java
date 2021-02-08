@@ -13,5 +13,6 @@ public class NewAmbientTempReadingObservable extends Observable {
     public void setTemp(double newTempReading){
         this.tempReading = newTempReading;
         this.setChanged();
+        this.notifyObservers(tempReading);
     }
 }
