@@ -59,11 +59,9 @@ public class UpdatedPumpConfigSubscriber {
         if (hasOverrideStatusChanged(updatedPumpConfig)) {
             log.info("The override status has been updated.");
             this.pumpOverrideStatusObservable.setOverrideStatus(updatedPumpConfig.getOverrideStatus());
-            this.pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
         } else {
             log.info("The turn on temperature has been updated.");
             this.pumpTurnOnTempObservable.setTurnOnTemp(updatedPumpConfig.getTurnOnTemp());
-            this.pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
         }
     }
 

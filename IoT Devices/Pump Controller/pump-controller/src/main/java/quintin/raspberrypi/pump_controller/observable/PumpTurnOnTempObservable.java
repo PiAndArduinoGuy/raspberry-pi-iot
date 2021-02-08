@@ -13,5 +13,6 @@ public class PumpTurnOnTempObservable extends Observable {
     public void setTurnOnTemp(double turnOnTemp) {
         this.turnOnTemp = turnOnTemp;
         this.setChanged();
+        this.notifyObservers(turnOnTemp);
     }
 }

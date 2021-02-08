@@ -1,21 +1,25 @@
 package quintin.raspberrypi.pump_controller.observer;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestTemplate;
 import quintin.raspberrypi.pump_controller.data.OverrideStatus;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.domain.AmbientTempReader;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
+import quintin.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
 import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
 import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
+import quintin.raspberrypi.pump_controller.runner.PumpControllerInitializer;
 
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -23,18 +27,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {
-        AutomaticPumpToggler.class,
-        PumpConfig.class,
-        PumpTurnOnTempObservable.class,
-        PumpOverrideStatusObservable.class,
-        PumpToggler.class,
-})
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AutomaticPumpTogglerUnitTest {
 
     @MockBean
     private ScheduledExecutorService scheduledExecutorService;
+
+    @MockBean
+    private RestTemplate controlHubBaseRestTemplateMock;
+
+    @MockBean
+    private PumpControllerInitializer pumpControllerInitializer;
 
     @Autowired
     private PumpConfig pumpConfig;
@@ -44,6 +48,9 @@ class AutomaticPumpTogglerUnitTest {
 
     @Autowired
     private PumpOverrideStatusObservable pumpOverrideStatusObservable;
+
+    @Autowired
+    private NewAmbientTempReadingObservable newAmbientTempReadingObservable;
 
     @SpyBean
     private AutomaticPumpToggler automaticPumpToggler;
@@ -60,92 +67,138 @@ class AutomaticPumpTogglerUnitTest {
     @Captor
     private ArgumentCaptor<OverrideStatus> overrideStatusCaptor;
 
+    @Captor
+    private ArgumentCaptor<Double> newAmbientTempReadingCaptor;
+
     @DisplayName(
-            "Given the AutomaticPumpToggler is an observer of both TurnOnTemperatureObservable and OverrideStatusObservable" +
+            "Given the AutomaticPumpToggler is an observer of TurnOnTemperatureObservable" +
                     "When TurnOnTemperature is changed" +
                     "Then the AutomaticPumpToggler is notified and receives the updated TurnOnTemperature"
     )
     @Test
     void canNotifyAutomaticPumpTogglerOfTurnOnTemperatureChange() {
-        doNothing().when(automaticPumpToggler).run();
         doNothing().when(pumpToggler).turnOnPump();
         doNothing().when(pumpToggler).turnOffPump();
 
         // Given
         pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
-        pumpOverrideStatusObservable.addObserver(automaticPumpToggler);
 
         // When
         pumpTurnOnTempObservable.setTurnOnTemp(20.00);
-        pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
 
         // Then
-        verify(automaticPumpToggler).update(any(), turnOnTempCaptor.capture());
+        verify(automaticPumpToggler).update(any(PumpTurnOnTempObservable.class), turnOnTempCaptor.capture());
         Double receivedTurnOnTemp = turnOnTempCaptor.getValue();
         assertThat(receivedTurnOnTemp).isEqualTo(20.00);
     }
 
     @DisplayName(
-            "Given the AutomaticPumpToggler is an observer of both TurnOnTemperatureObservable and OverrideStatusObservable" +
+            "Given the AutomaticPumpToggler is an observer of OverrideStatusObservable" +
                     "When OverrideStatus is changed" +
                     "Then the AutomaticPumpToggler is notified and receives the updated OverrideStatus"
     )
     @Test
     void canNotifyAutomaticPumpTogglerOfManualOverride() {
-        doNothing().when(automaticPumpToggler).run();
         doNothing().when(pumpToggler).turnOnPump();
         doNothing().when(pumpToggler).turnOffPump();
 
         // Given
-        pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
         pumpOverrideStatusObservable.addObserver(automaticPumpToggler);
 
         // When
         pumpOverrideStatusObservable.setOverrideStatus(OverrideStatus.PUMP_OFF);
-        pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());
 
         // Then
-        verify(automaticPumpToggler).update(any(), overrideStatusCaptor.capture());
+        verify(automaticPumpToggler).update(any(PumpOverrideStatusObservable.class), overrideStatusCaptor.capture());
         OverrideStatus receivedOverrideStatus = overrideStatusCaptor.getValue();
         assertThat(receivedOverrideStatus).isEqualTo(OverrideStatus.PUMP_OFF);
     }
 
-    @DisplayName(
-            "Given the AmbientTemperatureReader's readTemperature method returns 25.00 and the TurnOnTemperature is 20.00" +
-                    "When the AutomaticToggler in in run mode" +
-                    "Then the AutomaticPumpToggler is turned on"
-    )
+
     @Test
-    void canTurnOnPumpWhenAmbientTempMoreThanTurnOnTemp() throws Exception {
+    @DisplayName("Given AutomaticPumpToggler is an observer of NewAmbientTempReadingObservable" +
+            "When NewAmbientTempReadingObservable's tempReading changes" +
+            "Then the AutomaticPumpToggler receives the new reading from the NewAmbientTempReadingObservable and can add it to ambient temperature readings list")
+    void automaticPumpTogglerCanSumAmbientTemperatures(){
         // Given
-        when(ambientTempReaderMock.readTemp()).thenReturn(25.00);
-        pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
-        pumpTurnOnTempObservable.setTurnOnTemp(20.00);
-        pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
-        Thread.sleep(11000); // run method is only invoked after 10 seconds according to scheduledExecutorService.scheduleAtFixedRate method
+        newAmbientTempReadingObservable.addObserver(automaticPumpToggler);
+
+        // When
+        newAmbientTempReadingObservable.setTemp(10.00);
 
         // Then
-        verify(pumpToggler).turnOnPump();
-
+        verify(automaticPumpToggler).update(any(NewAmbientTempReadingObservable.class), newAmbientTempReadingCaptor.capture());
+        Double newAmbientTempReading = newAmbientTempReadingCaptor.getValue();
+        assertThat(newAmbientTempReading).isEqualTo(10.0);
     }
 
-    @DisplayName(
-            "Given the AmbientTemperatureReader's readTemperature method returns 25.00 and the TurnOnTemperature is 26.00" +
-                    "When the AutomaticToggler in in run mode" +
-                    "Then the AutomaticPumpToggler is turned off"
-    )
     @Test
-    void canTurnOffPumpWhenAmbientTempLessThanTurnOnTemp() throws Exception {
+    @DisplayName("Given AutomaticPumpToggler is an observer of NewAmbientTempReadingObservable" +
+            "When NewAmbientTempReadingObservable's tempReading changes and observers are notified" +
+            "Then the AutomaticPumpToggler receives the new reading from the NewAmbientTempReadingObservable")
+    void canNotifyAutomaticPumpTogglerOfNewTempReading(){
         // Given
-        when(ambientTempReaderMock.readTemp()).thenReturn(25.00);
-        pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
-        pumpTurnOnTempObservable.setTurnOnTemp(26.00);
-        pumpTurnOnTempObservable.notifyObservers(this.pumpTurnOnTempObservable.getTurnOnTemp());
-        Thread.sleep(11000); // run method is only invoked after 10 seconds according to scheduledExecutorService.scheduleAtFixedRate method
+        newAmbientTempReadingObservable.addObserver(automaticPumpToggler);
+
+        // When
+        newAmbientTempReadingObservable.setTemp(10.00);
 
         // Then
-        verify(pumpToggler).turnOffPump();
+        verify(automaticPumpToggler).update(any(NewAmbientTempReadingObservable.class),any(Double.class));
+    }
 
+    @Test
+    @DisplayName("Given the AmbientTempReader has given 5 temps greater than 30" +
+            "When the AutomaticPumpToggler needs to perform its check with an interval of 5 seconds " +
+            "Then the average of the 5 temperatures is used to determine if the PumpToggler be toggled on")
+    void canTogglePumpOnBasedOnCriteria() throws Exception {
+        automaticPumpToggler.update(pumpTurnOnTempObservable, 30.00); // set turn on temp for test to drive expected behaviour
+
+        simulateFiveGreaterThan30AmbientTempReadings();
+
+        verify(automaticPumpToggler, atMost(6)).update(any(),any()); // additional call is for turnOnTempObservable
+        verify(pumpToggler).turnOnPump();
+    }
+
+    @Test
+    @DisplayName("Given the AmbientTempReader has given 5 temps less than 30" +
+            "When the AutomaticPumpToggler needs to perform its check with an interval of 5 seconds " +
+            "Then the average of the 5 temperatures is used to determine if the PumpToggler be toggled off")
+    void canTogglePumpOffBasedOnCriteria() throws Exception {
+        automaticPumpToggler.update(pumpTurnOnTempObservable, 30.00); // set turn on temp for test to drive expected behaviour
+
+        simulateFiveLessThan30AmbientTempReadings();
+
+        verify(automaticPumpToggler, atMost(6)).update(any(),any()); // additional call is for turnOnTempObservable
+        verify(pumpToggler).turnOffPump();
+    }
+
+    private void simulateFiveGreaterThan30AmbientTempReadings() {
+        newAmbientTempReadingObservable.addObserver(automaticPumpToggler);
+        newAmbientTempReadingObservable.setTemp(34.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+        newAmbientTempReadingObservable.setTemp(31.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+        newAmbientTempReadingObservable.setTemp(30.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+        newAmbientTempReadingObservable.setTemp(32.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+        newAmbientTempReadingObservable.setTemp(39.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+    }
+
+    private void simulateFiveLessThan30AmbientTempReadings() {
+        newAmbientTempReadingObservable.addObserver(automaticPumpToggler);
+        newAmbientTempReadingObservable.setTemp(29.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+        newAmbientTempReadingObservable.setTemp(28.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+        newAmbientTempReadingObservable.setTemp(27.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+        newAmbientTempReadingObservable.setTemp(26.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
+        newAmbientTempReadingObservable.setTemp(25.00);
+        newAmbientTempReadingObservable.notifyObservers(newAmbientTempReadingObservable.getTempReading());
     }
 
 

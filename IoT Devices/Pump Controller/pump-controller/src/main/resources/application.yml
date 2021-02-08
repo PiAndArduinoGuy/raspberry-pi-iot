@@ -21,3 +21,11 @@ mcp3002:
   python-script:
     pi:
       location: "/home/pi/Desktop/mcp3002_adc_value.py"
+
+automatic-pump-toggler:
+  readings-before-check: 5
+
+ambient-temp-reader:
+  scheduler:
+    delay-seconds: 10
+    rate-seconds: 20
