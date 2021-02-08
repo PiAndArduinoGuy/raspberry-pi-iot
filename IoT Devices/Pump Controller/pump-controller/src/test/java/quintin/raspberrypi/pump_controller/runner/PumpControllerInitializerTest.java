@@ -1,5 +1,6 @@
 package quintin.raspberrypi.pump_controller.runner;
 
+import org.hibernate.validator.constraints.ModCheck;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,7 @@ import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservab
 import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 import quintin.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 import quintin.raspberrypi.pump_controller.observer.ManualPumpToggler;
+import quintin.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,10 +42,13 @@ import static org.mockito.Mockito.when;
         PumpToggler.class,
         PumpOverrideStatusObservable.class,
         PumpTurnOnTempObservable.class,
-        NewAmbientTempReadingObservable.class
+        NewAmbientTempReadingObservable.class,
+        AmbientTempPublisher.class
 })
 @TestPropertySource("classpath:application-test.properties")
 class PumpControllerInitializerTest {
+    @MockBean
+    private AmbientTempPublisher ambientTempPublisher;
 
     @MockBean
     private PumpToggler pumpToggler;

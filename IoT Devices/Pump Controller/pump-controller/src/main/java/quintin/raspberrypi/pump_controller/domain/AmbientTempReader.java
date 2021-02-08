@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import quintin.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
 import quintin.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
+import quintin.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -37,9 +38,10 @@ public class AmbientTempReader implements Runnable {
     private Long rate;
 
     @Autowired
-    public AmbientTempReader(AutomaticPumpToggler automaticPumpToggler, NewAmbientTempReadingObservable newAmbientTempReadingObservable) {
+    public AmbientTempReader(AutomaticPumpToggler automaticPumpToggler, NewAmbientTempReadingObservable newAmbientTempReadingObservable, AmbientTempPublisher ambientTempPublisher) {
         this.newAmbientTempReadingObservable = newAmbientTempReadingObservable;
         this.newAmbientTempReadingObservable.addObserver(automaticPumpToggler);
+        this.newAmbientTempReadingObservable.addObserver(ambientTempPublisher);
     }
 
     @PostConstruct
