@@ -13,7 +13,6 @@ import quintin.raspberrypi.control_hub.util.TestUtil;
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 
 @SpringBootTest
-@DirtiesContext
 public class PumpControllerServiceIntegrationTest {
 
     @Autowired
