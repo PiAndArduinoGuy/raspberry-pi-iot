@@ -36,29 +36,40 @@ public class PumpControllerServiceIntegrationTest {
     }
 
     @Test
-    @DisplayName("Given the ambient temp readings 10.00, 11.00 and 12.00 are sent to the AmbientTempReadingSubscriber" +
+    @DisplayName("Given 15 ambient temp readings are sent between 20 and 34 inclusive to the AmbientTempReadingSubscriber" +
             " When the AmbientTempService's getAverageTempReading is called" +
-            " Then 11.00 is returned")
+            " Then 27.00 is returned")
     @DirtiesContext
     void canGetAverageAmbientTempReading(){
         TestUtil.sendFifteenAmbientTempReadingsUsingBinding(binding);
-        double averageAmbientTempReading = pumpControllerService.getAverageTempReading();
+        double averageAmbientTempReading = pumpControllerService.getLatestFifteenAmbientTempReadingsAvg();
 
         assertThat(averageAmbientTempReading).isEqualTo(27.00);
     }
 
     @Test
-    @DisplayName("Given the ambient temp readings 10.00, 11.00 and 12.00 are sent to the AmbientTempReadingSubscriber" +
-            " When the AmbientTempService's getAverageTempReading is called" +
-            " Then 11.00 is returned")
+    @DisplayName("Given less than 15 ambient temp readings are sent to the AmbientTempReadingSubscriber" +
+            " When the AmbientTempService's getLatestFifteenAmbientTempReadingsAvg is called" +
+            " Then a RaspberryPiControlHub exception is thrown with the message 15 ambient temperature readings have not yet been captured, an average could not be calculated'")
     @DirtiesContext
     void canGetRaspberryPiControlHubExcecptionWhenCallingAverageTempWithLessThan15ReadingsSent(){
         sendThreeAmbientTempReadings();
-
         assertThatThrownBy(() ->{
-            double averageAmbientTempReading = pumpControllerService.getAverageTempReading();
+            pumpControllerService.getLatestFifteenAmbientTempReadingsAvg();
         }).isInstanceOf(RaspberryPiControlHubException.class)
-                .hasMessage("15 ambient temperature readings have not yet been captured.");
+                .hasMessage("15 ambient temperature readings have not yet been captured, an average could not be calculated");
+    }
+
+    @Test
+    @DisplayName("Given no ambient temp reading is sent to the AmbientTempReadingSubscriber" +
+            " When the AmbientTempService's getLatestAmbientTempReading is called" +
+            " Then a RaspberryPiControlHub exception is thrown with the message ''")
+    @DirtiesContext
+    void canGetRaspberryPiControlHubExcecptionWhenCallingGetLatestAmbientTempReadings(){
+        assertThatThrownBy(() ->{
+            pumpControllerService.getLatestAmbientTempReading();
+        }).isInstanceOf(RaspberryPiControlHubException.class)
+                .hasMessage("An ambient temperature has not yet been sent.");
     }
 
     private void sendThreeAmbientTempReadings() {

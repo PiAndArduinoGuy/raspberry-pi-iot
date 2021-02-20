@@ -2,15 +2,13 @@ package quintin.raspberrypi.control_hub.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import quintin.raspberrypi.control_hub.PumpConfig;
 
 import static quintin.raspberrypi.control_hub.controller.PumpConfigValidation.validateTurnOffTemperature;
 
 @RequestMapping("pump-controller/")
+@CrossOrigin
 public interface PumpControllerController {
     @GetMapping("latest-ambient-temp-reading")
     default ResponseEntity<Double> getLatestAmbientTempReading() {

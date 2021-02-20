@@ -36,37 +36,6 @@ class PumpControllerControllerIntegrationTest {
     @Autowired
     private Sink binding;
 
-    @Test
-    @DisplayName("Given the ambient temp readings are 15.00 through 30.00 have been published to the ambienttemp queue and the ambient temp readings list is of size 15" +
-            "When the get /pump-controller/latest-average-ambient-temp-reading endpoint is hit" +
-            "Then the response is 200 OK and the body contains the average of 22.50")
-    @DirtiesContext
-    void canGetLatestAverageTemp200OkResponse(){
-        TestUtil.sendFifteenAmbientTempReadingsUsingBinding(binding);
-
-        ResponseEntity<Double> responseEntity =
-                this.restTemplate.getForEntity("http://localhost:" + port +"control-hub-backend/pump-controller/latest-average-ambient-temp-reading", Double.class);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualTo(27.00);
-    }
-
-    @Test
-    @DisplayName("Given the ambient temp reading 15.00 has been published to the ambienttemp queue and the ambient remp readings list has a size less than 15" +
-            "When the get /pump-controller/latest-average-ambient-temp-reading endpoint is hit" +
-            "Then the response is a Zalando problem with 400 Bad request and detail says '15 ambient temperature readings have not yet been captured.'")
-    @DirtiesContext
-    void canGet400BadRequestResponseWithLessThan15AmbientTempReadings(){
-        binding.input().send(MessageBuilder.withPayload(16.00).build());
-
-        ResponseEntity<Problem> responseEntity =
-                this.restTemplate.getForEntity("http://localhost:" + port +"control-hub-backend/pump-controller/latest-average-ambient-temp-reading", Problem.class);
-
-        Problem expectedZalandoProblem = new Problem(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value(), "15 ambient temperature readings have not yet been captured.");
-
-
-        TestUtil.assertZalandoProblem(expectedZalandoProblem, responseEntity.getStatusCode(),  "15 ambient temperature readings have not yet been captured.");
-    }
 
     @Test
     void canGetOkResponseForCreatingAValidNewPumpConfigInstance(){
@@ -110,6 +79,35 @@ class PumpControllerControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Given the ambient temp readings are 20.00 through 34.00 have been published to the ambienttemp queue" +
+            "When the get /pump-controller/latest-average-ambient-temp-reading endpoint is hit" +
+            "Then the response is 200 OK and the body contains the average of 27.00")
+    @DirtiesContext
+    void canGetLatestAverageTemp200OkResponse(){
+        TestUtil.sendFifteenAmbientTempReadingsUsingBinding(binding);
+
+        ResponseEntity<Double> responseEntity =
+                this.restTemplate.getForEntity("http://localhost:" + port +"control-hub-backend/pump-controller/latest-average-ambient-temp-reading", Double.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(27.00);
+    }
+
+    @Test
+    @DisplayName("Given the ambient temp reading 15.00 has been published to the ambienttemp queue and the ambient remp readings list has a size less than 15" +
+            "When the get /pump-controller/latest-average-ambient-temp-reading endpoint is hit" +
+            "Then the response is a Zalando problem with 400 Bad request and detail says '15 ambient temperature readings have not yet been captured, an average could not be calculated'")
+    @DirtiesContext
+    void canGet400BadRequestResponseWithLessThan15AmbientTempReadings(){
+        binding.input().send(MessageBuilder.withPayload(16.00).build());
+
+        ResponseEntity<Problem> responseEntity =
+                this.restTemplate.getForEntity("http://localhost:" + port +"control-hub-backend/pump-controller/latest-average-ambient-temp-reading", Problem.class);
+
+        TestUtil.assertZalandoProblem(responseEntity.getBody(), responseEntity.getStatusCode(),  "15 ambient temperature readings have not yet been captured, an average could not be calculated");
+    }
+
+    @Test
     @DisplayName("Given the ambient temp reading 10.00 has been published to ambienttemp queue" +
             " When get request is made to /pump-controller/latest-ambient-temp-reading" +
             " Then the response is 200 OK and the body is 10.00")
@@ -140,6 +138,15 @@ class PumpControllerControllerIntegrationTest {
         Assertions.assertThat(responseEntity.getBody()).isEqualTo(11.00);
     }
 
+    @Test
+    @DisplayName("Given no ambient temp reading has been sent" +
+            " When the /pump-controller/latest-ambient-temp-reading endpoint is hit" +
+            " Then the response is a Zalando problem with 400 Bad request and detail says 'An ambient temperature has not yet been sent.'")
+    void canGetOkResponseAndLatestAvgAmbientTempReading(){
+        ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/latest-ambient-temp-reading", Problem.class);
+
+        TestUtil.assertZalandoProblem(responseEntity.getBody(), HttpStatus.BAD_REQUEST, "An ambient temperature has not yet been sent.");
+    }
 
 
     private void assertPumpConfigValues(final PumpConfig pumpConfig, final double expectedTurnOffTemp, final OverrideStatus expectedOverrideStatus) {

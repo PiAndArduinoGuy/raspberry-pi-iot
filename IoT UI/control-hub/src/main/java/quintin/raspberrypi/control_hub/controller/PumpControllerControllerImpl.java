@@ -34,7 +34,7 @@ public class PumpControllerControllerImpl implements PumpControllerController{
 
     @Override
     public ResponseEntity<Double> getLatestAverageAmbientTempReading(){
-        return new ResponseEntity(pumpControllerService.getAverageTempReading(), HttpStatus.OK);
+        return new ResponseEntity(pumpControllerService.getLatestFifteenAmbientTempReadingsAvg(), HttpStatus.OK);
     }
 
     @Override
