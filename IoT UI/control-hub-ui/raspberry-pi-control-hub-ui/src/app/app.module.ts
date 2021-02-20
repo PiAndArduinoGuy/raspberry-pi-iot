@@ -10,6 +10,7 @@ import { ConfigurationEditComponent } from './pool-pump-controller/configuration
 import {FormsModule} from '@angular/forms';
 import { OptionsComponent } from './pool-pump-controller/options/options.component';
 import {HttpClient, HttpClientModule} from '@angular/common/http';
+import { PumpControllerDashboardComponent } from './pool-pump-controller/pump-controller-dashboard/pump-controller-dashboard.component';
 
 const routes: Route[] = [
   {path: 'control-hub-frontend', component: HomeComponent},
@@ -27,6 +28,7 @@ const routes: Route[] = [
     PoolPumpControllerComponent,
     ConfigurationEditComponent,
     OptionsComponent,
+    PumpControllerDashboardComponent,
   ],
   imports: [
     BrowserModule,

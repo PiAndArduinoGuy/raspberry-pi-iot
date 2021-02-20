@@ -10,3 +10,5 @@ spring:
       bindings:
         output:
           destination: pumpconfigupdate
+        input:
+          destination: ambienttemp

@@ -1,0 +1,13 @@
+<p *ngIf="!noAmbientTempReadingYet; else noAmbientTempReadingYetDisplay" class="alert alert-info">
+  Latest ambient temperature: {{latestAmbientTempReading| number:'1.2-2'}} &#8451;
+</p>
+<ng-template #noAmbientTempReadingYetDisplay>
+  <p class="alert alert-warning">An ambient temperature reading yet.</p>
+</ng-template>
+
+<p *ngIf="!noAvgAmbientTempReadingYet; else noAvgAmbientTempReadingYetDisplay"class="alert alert-info">
+  Latest average ambient temperature: {{ latestAvgAmbientTempReading| number:'1.2-2' }} &#8451;
+</p>
+<ng-template #noAvgAmbientTempReadingYetDisplay>
+  <p class="alert alert-warning">An average ambient temperature reading could not yet be claculated.</p>
+</ng-template>

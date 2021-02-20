@@ -2,6 +2,7 @@ import {HttpClient} from '@angular/common/http';
 import {PumpConfigModel} from './pump-config.model';
 import {Injectable} from '@angular/core';
 import {OverrideStatusEnum} from './override-status.enum';
+import { Observable } from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class BackendHttpRequestsService {
@@ -21,5 +22,14 @@ export class BackendHttpRequestsService {
     }, error => {
       console.log(error);
     });
+  }
+
+  getLatestAmbientTempReading(): Observable<number>{
+    return this.http.get<number>(this.baseUrl + '/latest-ambient-temp-reading');
+
+  }
+
+  getLatestAvgAmbientTempReading(): Observable<number>{
+    return this.http.get<number>(this.baseUrl + '/latest-average-ambient-temp-reading');
   }
 }
