@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.client.RestTemplate;
+import quintin.raspberrypi.pump_controller.channel.PumpControllerChannels;
 import quintin.raspberrypi.pump_controller.data.OverrideStatus;
 import quintin.raspberrypi.pump_controller.data.Problem;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
@@ -38,7 +39,7 @@ import static org.mockito.Mockito.when;
 class UpdatedPumpConfigSubscriberUnitTest {
 
     @Autowired
-    private Sink binding;
+    private PumpControllerChannels binding;
 
     @Autowired
     private PumpConfig pumpConfig;
@@ -86,7 +87,7 @@ class UpdatedPumpConfigSubscriberUnitTest {
                 .thenReturn(new ResponseEntity<>(mockPumpConfigResponse, HttpStatus.OK));
 
         // When
-        binding.input().send(MessageBuilder.withPayload("Pump configuration updated").build());
+        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("Pump configuration updated").build());
 
         // Then
         verify(updatedPumpConfigSubscriber).sendPumpUpdateConfigToObservers(messageCaptor.capture());
@@ -97,7 +98,7 @@ class UpdatedPumpConfigSubscriberUnitTest {
     @Test
     void givenMessageSentNotRecognizedByPumpController_whenMessageReceived_thenExceptionThrownStatingMessageNotRecognized() {
         assertThatThrownBy(() -> {
-            binding.input().send(MessageBuilder.withPayload("A message that should not be recognized").build());
+            binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("A message that should not be recognized").build());
 
         }).isInstanceOf(MessagingException.class)
                 .hasMessageContaining("A message was received that is not recognized - Expected the message 'Pump configuration updated' but received 'A message that should not be recognized'");
@@ -118,7 +119,7 @@ class UpdatedPumpConfigSubscriberUnitTest {
         pumpOverrideStatusObservable.addObserver(manualPumpToggler);
 
         // When
-        binding.input().send(MessageBuilder.withPayload("Pump configuration updated").build());
+        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("Pump configuration updated").build());
 
         // Then
         verify(automaticPumpToggler).update(any(Observable.class), any(OverrideStatus.class));
@@ -138,7 +139,7 @@ class UpdatedPumpConfigSubscriberUnitTest {
         pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
 
         // When
-        binding.input().send(MessageBuilder.withPayload("Pump configuration updated").build());
+        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("Pump configuration updated").build());
 
         // Then
         verify(automaticPumpToggler).update(any(Observable.class), any(Double.class));
@@ -157,7 +158,7 @@ class UpdatedPumpConfigSubscriberUnitTest {
 
         // When and Then
         assertThatThrownBy(() -> {
-            binding.input().send(MessageBuilder.withPayload("Pump configuration updated").build());
+            binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("Pump configuration updated").build());
         }).isInstanceOf(MessagingException.class)
                 .hasMessageContaining("The updated pump config could not be retrieved from the control hub, the response was: Problem(title=Bad Request, status=400, detail=The request could not be serviced.)");
 
