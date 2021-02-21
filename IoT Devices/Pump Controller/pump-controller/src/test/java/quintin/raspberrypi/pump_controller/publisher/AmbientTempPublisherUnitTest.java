@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
+import quintin.raspberrypi.pump_controller.channel.PumpControllerChannels;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
 import quintin.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
 import quintin.raspberrypi.pump_controller.runner.PumpControllerInitializer;
@@ -22,7 +23,7 @@ class AmbientTempPublisherUnitTest {
     private PumpControllerInitializer pumpControllerInitializer;
 
     @Autowired
-    private Source binding;
+    private PumpControllerChannels binding;
 
     @Autowired
     private NewAmbientTempReadingObservable newAmbientTempReadingObservable;
@@ -41,7 +42,7 @@ class AmbientTempPublisherUnitTest {
         ambientTempPublisher.update(newAmbientTempReadingObservable, 10.0);
 
         // Then
-        String sentAmbientTemp = (String) messageCollector.forChannel(binding.output()).poll().getPayload();
+        String sentAmbientTemp = (String) messageCollector.forChannel(binding.newTempOutput()).poll().getPayload();
         assertThat(sentAmbientTemp).isEqualTo("10.0");
     }
 
