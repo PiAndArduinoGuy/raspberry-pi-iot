@@ -14,10 +14,11 @@ import org.springframework.util.ResourceUtils;
 import org.springframework.web.client.RestTemplate;
 import quintin.raspberrypi.control_hub.OverrideStatus;
 import quintin.raspberrypi.control_hub.PumpConfig;
+import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
 import quintin.raspberrypi.control_hub.exception.RaspberryPiControlHubException;
 
 @Service
-@EnableBinding(Source.class)
+@EnableBinding(ControlHubChannels.class)
 public class PumpConfigService {
 
     private final ObjectMapper objectMapper;
@@ -46,7 +47,7 @@ public class PumpConfigService {
         return pumpConfig;
     }
 
-    @SendTo(Source.OUTPUT)
+    @SendTo(ControlHubChannels.NEW_PUMP_CONFIG_OUTPUT)
     public String notifyPumpControllerOfUpdate(PumpConfig newPumpConfig) {
         return "Pump configuration updated";
     }

@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
+import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
 import quintin.raspberrypi.control_hub.exception.RaspberryPiControlHubException;
 import quintin.raspberrypi.control_hub.util.TestUtil;
 
@@ -19,7 +20,7 @@ public class PumpControllerServiceIntegrationTest {
     private PumpControllerService pumpControllerService;
 
     @Autowired
-    private Sink binding;
+    private ControlHubChannels binding;
 
 
     @Test
@@ -73,8 +74,8 @@ public class PumpControllerServiceIntegrationTest {
     }
 
     private void sendThreeAmbientTempReadings() {
-        binding.input().send(MessageBuilder.withPayload("10.00").build());
-        binding.input().send(MessageBuilder.withPayload("11.00").build());
-        binding.input().send(MessageBuilder.withPayload("12.00").build());
+        binding.newAmbientTempInput().send(MessageBuilder.withPayload("10.00").build());
+        binding.newAmbientTempInput().send(MessageBuilder.withPayload("11.00").build());
+        binding.newAmbientTempInput().send(MessageBuilder.withPayload("12.00").build());
     }
 }
