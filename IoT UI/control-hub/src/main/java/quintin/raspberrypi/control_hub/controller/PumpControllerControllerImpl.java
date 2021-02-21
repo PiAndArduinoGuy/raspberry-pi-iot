@@ -49,4 +49,9 @@ public class PumpControllerControllerImpl implements PumpControllerController{
     public ResponseEntity<PumpConfig> getPumpConfiguration(){
         return new ResponseEntity<>(this.pumpConfigService.getPumpConfig(), HttpStatus.OK);
     }
+
+    @Override
+    public ResponseEntity<String> getPumpControllerState() {
+        return new ResponseEntity<>(this.pumpControllerService.getPumpControllerStatus(), HttpStatus.OK);
+    }
 }

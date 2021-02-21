@@ -16,6 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.util.ResourceUtils;
 import quintin.raspberrypi.control_hub.OverrideStatus;
 import quintin.raspberrypi.control_hub.PumpConfig;
+import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
 import quintin.raspberrypi.control_hub.exception.Problem;
 import quintin.raspberrypi.control_hub.util.TestUtil;
 
@@ -34,7 +35,7 @@ class PumpControllerControllerIntegrationTest {
     private TestRestTemplate restTemplate;
 
     @Autowired
-    private Sink binding;
+    private ControlHubChannels binding;
 
 
     @Test
@@ -99,7 +100,7 @@ class PumpControllerControllerIntegrationTest {
             "Then the response is a Zalando problem with 400 Bad request and detail says '15 ambient temperature readings have not yet been captured, an average could not be calculated'")
     @DirtiesContext
     void canGet400BadRequestResponseWithLessThan15AmbientTempReadings(){
-        binding.input().send(MessageBuilder.withPayload(16.00).build());
+        binding.newAmbientTempInput().send(MessageBuilder.withPayload(16.00).build());
 
         ResponseEntity<Problem> responseEntity =
                 this.restTemplate.getForEntity("http://localhost:" + port +"control-hub-backend/pump-controller/latest-average-ambient-temp-reading", Problem.class);
@@ -113,7 +114,7 @@ class PumpControllerControllerIntegrationTest {
             " Then the response is 200 OK and the body is 10.00")
     @DirtiesContext
     void canGetOkResponseAndLatestAmbientTempFromPumpControllerWithOneAmbientTempReadingSent(){
-        binding.input().send(MessageBuilder.withPayload(10.00).build());
+        binding.newAmbientTempInput().send(MessageBuilder.withPayload(10.00).build());
 
         ResponseEntity<Double> responseEntity =
                 this.restTemplate.getForEntity("http://localhost:" + port +"control-hub-backend/pump-controller/latest-ambient-temp-reading", Double.class);
@@ -128,14 +129,14 @@ class PumpControllerControllerIntegrationTest {
             " Then the response is 200 OK and the body is 11.00")
     @DirtiesContext
     void canGetOkResponseAndLatestAmbientTempFromPumpControllerWithMultipleAmbientTempReadingsSend(){
-        binding.input().send(MessageBuilder.withPayload(10.00).build());
-        binding.input().send(MessageBuilder.withPayload(11.00).build());
+        binding.newAmbientTempInput().send(MessageBuilder.withPayload(10.00).build());
+        binding.newAmbientTempInput().send(MessageBuilder.withPayload(11.00).build());
 
         ResponseEntity<Double> responseEntity =
                 this.restTemplate.getForEntity("http://localhost:" + port +"control-hub-backend/pump-controller/latest-ambient-temp-reading", Double.class);
 
-        Assertions.assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        Assertions.assertThat(responseEntity.getBody()).isEqualTo(11.00);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(11.00);
     }
 
     @Test
@@ -153,5 +154,43 @@ class PumpControllerControllerIntegrationTest {
         Assertions.assertThat(pumpConfig).isNotNull();
         Assertions.assertThat(pumpConfig.getTurnOffTemp()).isEqualTo(expectedTurnOffTemp);
         Assertions.assertThat(pumpConfig.getOverrideStatus()).isEqualTo(expectedOverrideStatus);
+    }
+
+    @Test
+    @DisplayName("Given the pump controller state 'on' has been published to the pumpcontrollertogglestatus queue" +
+            " When the get /pump-controller/state endpoint is hit" +
+            " Then the response is 200 OK with the pump state 'on' in the body of the response")
+    @DirtiesContext
+    void canGetOkResponseForPumpControllerStateEndpointWithOnBody(){
+        binding.pumpStateInput().send(MessageBuilder.withPayload("on").build());
+
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", String.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualToIgnoringCase("on");
+    }
+
+    @Test
+    @DisplayName("Given the pump controller state 'off' has been published to the pumpcontrollertogglestatus queue" +
+            " When the get /pump-controller/state endpoint is hit" +
+            " Then the response is 200 OK with the pump state 'on' in the body of the response")
+    @DirtiesContext
+    void canGetOkResponseForPumpControllerStateEndpointWithOffBody(){
+        binding.pumpStateInput().send(MessageBuilder.withPayload("off").build());
+
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", String.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualToIgnoringCase("off");
+    }
+
+    @Test
+    @DisplayName("Given the pump controller state has not been published to the pumpcontrollertogglestatus" +
+            " When the get /pump-controller/state is hit " +
+            " Then the response is 400 Bad request with Zalando problem and details says 'The pump controller state has not been sent to the control hub. The state cannot be determined.'")
+    void canGetZalandoProblemResponseWithNoPumpControllerStatePublished(){
+        ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", Problem.class);
+
+        TestUtil.assertZalandoProblem(responseEntity.getBody(), responseEntity.getStatusCode(), "The pump controller state has not been sent to the control hub. The state cannot be determined.");
     }
 }

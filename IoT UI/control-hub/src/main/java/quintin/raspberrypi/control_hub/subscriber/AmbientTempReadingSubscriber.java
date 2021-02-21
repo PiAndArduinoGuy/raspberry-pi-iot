@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
+import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
 import quintin.raspberrypi.control_hub.observable.LatestAmbientTempReadingObservable;
 import quintin.raspberrypi.control_hub.observable.LatestFifteenAmbientTempReadingsObservable;
 import quintin.raspberrypi.control_hub.service.PumpControllerService;
@@ -11,7 +12,7 @@ import quintin.raspberrypi.control_hub.service.PumpControllerService;
 import java.util.ArrayList;
 import java.util.List;
 
-@EnableBinding(Sink.class)
+@EnableBinding(ControlHubChannels.class)
 public class AmbientTempReadingSubscriber {
     private List<Double> ambientTempReadings;
     private LatestFifteenAmbientTempReadingsObservable latestFifteenAmbientTempReadingsObservable;
@@ -26,7 +27,7 @@ public class AmbientTempReadingSubscriber {
         ambientTempReadings = new ArrayList();
     }
 
-    @StreamListener(Sink.INPUT)
+    @StreamListener(ControlHubChannels.NEW_AMBIENT_TEMP_INPUT)
     private void receiveNewAmbientTempReading(String receivedAmbientTempReading) {
         this.latestAmbientTempReadingObservable.setLatestAmbientTempReading(Double.parseDouble(receivedAmbientTempReading));
 

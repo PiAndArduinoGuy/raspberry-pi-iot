@@ -29,4 +29,9 @@ public interface PumpControllerController {
     default ResponseEntity<PumpConfig> getPumpConfiguration(){
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
+
+    @GetMapping("state")
+    default ResponseEntity<String> getPumpControllerState(){
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
 }

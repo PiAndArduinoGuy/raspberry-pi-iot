@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
+import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
 import quintin.raspberrypi.control_hub.observable.LatestFifteenAmbientTempReadingsObservable;
 import quintin.raspberrypi.control_hub.service.PumpControllerService;
 import quintin.raspberrypi.control_hub.util.TestUtil;
@@ -17,7 +18,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 public class AmbientTempReadingSubscriberIntegrationTest {
 
     @Autowired
-    private Sink binding;
+    private ControlHubChannels binding;
 
     @Autowired
     private PumpControllerService pumpControllerService;
@@ -42,7 +43,7 @@ public class AmbientTempReadingSubscriberIntegrationTest {
             " Then PumpControllerService is notified of latestFifteenAmbientTempReadingsObservable")
     @DirtiesContext
     void canNotifyObserverOfLatestAmbientTempReading(){
-        binding.input().send(MessageBuilder.withPayload(11.00).build());
+        binding.newAmbientTempInput().send(MessageBuilder.withPayload(11.00).build());
 
         Double latestAmbientTempReading = pumpControllerService.getLatestAmbientTempReading();
 
