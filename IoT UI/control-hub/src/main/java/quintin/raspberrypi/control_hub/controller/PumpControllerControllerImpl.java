@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import quintin.raspberrypi.control_hub.PumpConfig;
+import quintin.raspberrypi.control_hub.domain.PumpState;
 import quintin.raspberrypi.control_hub.publisher.UpdatedPumpConfigPublisher;
 import quintin.raspberrypi.control_hub.service.PumpConfigService;
 import quintin.raspberrypi.control_hub.service.PumpControllerService;
@@ -51,7 +52,7 @@ public class PumpControllerControllerImpl implements PumpControllerController{
     }
 
     @Override
-    public ResponseEntity<String> getPumpControllerState() {
+    public ResponseEntity<PumpState> getPumpControllerState() {
         return new ResponseEntity<>(this.pumpControllerService.getPumpControllerStatus(), HttpStatus.OK);
     }
 }

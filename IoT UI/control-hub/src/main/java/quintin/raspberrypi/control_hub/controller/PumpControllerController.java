@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import quintin.raspberrypi.control_hub.PumpConfig;
+import quintin.raspberrypi.control_hub.domain.PumpState;
 
 import static quintin.raspberrypi.control_hub.controller.PumpConfigValidation.validateTurnOffTemperature;
 
@@ -31,7 +32,7 @@ public interface PumpControllerController {
     }
 
     @GetMapping("state")
-    default ResponseEntity<String> getPumpControllerState(){
+    default ResponseEntity<PumpState> getPumpControllerState(){
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 }

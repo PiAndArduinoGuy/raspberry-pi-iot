@@ -17,6 +17,7 @@ import org.springframework.util.ResourceUtils;
 import quintin.raspberrypi.control_hub.OverrideStatus;
 import quintin.raspberrypi.control_hub.PumpConfig;
 import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
+import quintin.raspberrypi.control_hub.domain.PumpState;
 import quintin.raspberrypi.control_hub.exception.Problem;
 import quintin.raspberrypi.control_hub.util.TestUtil;
 
@@ -105,7 +106,7 @@ class PumpControllerControllerIntegrationTest {
         ResponseEntity<Problem> responseEntity =
                 this.restTemplate.getForEntity("http://localhost:" + port +"control-hub-backend/pump-controller/latest-average-ambient-temp-reading", Problem.class);
 
-        TestUtil.assertZalandoProblem(responseEntity.getBody(), responseEntity.getStatusCode(),  "15 ambient temperature readings have not yet been captured, an average could not be calculated");
+        TestUtil.assertZalandoProblem(responseEntity.getBody(), HttpStatus.BAD_REQUEST,  "15 ambient temperature readings have not yet been captured, an average could not be calculated");
     }
 
     @Test
@@ -157,31 +158,44 @@ class PumpControllerControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Given the pump controller state 'on' has been published to the pumpcontrollertogglestatus queue" +
+    @DisplayName("Given the pump controller state 'ON' has been published to the pumpcontrollertogglestatus queue" +
             " When the get /pump-controller/state endpoint is hit" +
-            " Then the response is 200 OK with the pump state 'on' in the body of the response")
+            " Then the response is 200 OK with the pump state 'ON' in the body of the response")
     @DirtiesContext
     void canGetOkResponseForPumpControllerStateEndpointWithOnBody(){
-        binding.pumpStateInput().send(MessageBuilder.withPayload("on").build());
+        binding.pumpStateInput().send(MessageBuilder.withPayload("ON").build());
 
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", String.class);
+        ResponseEntity<PumpState> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", PumpState.class);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualToIgnoringCase("on");
+        assertThat(responseEntity.getBody()).isEqualTo(PumpState.ON);
     }
 
     @Test
-    @DisplayName("Given the pump controller state 'off' has been published to the pumpcontrollertogglestatus queue" +
+    @DisplayName("Given the pump controller state 'OFF' has been published to the pumpcontrollertogglestatus queue" +
             " When the get /pump-controller/state endpoint is hit" +
-            " Then the response is 200 OK with the pump state 'on' in the body of the response")
+            " Then the response is 200 OK with the PumpState.OFF in the body of the response")
     @DirtiesContext
     void canGetOkResponseForPumpControllerStateEndpointWithOffBody(){
-        binding.pumpStateInput().send(MessageBuilder.withPayload("off").build());
+        binding.pumpStateInput().send(MessageBuilder.withPayload("OFF").build());
 
-        ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", String.class);
+        ResponseEntity<PumpState> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", PumpState.class);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualToIgnoringCase("off");
+        assertThat(responseEntity.getBody()).isEqualTo(PumpState.OFF);
+    }
+
+    @Test
+    @DisplayName("Given the pump controller state 'OfF' has been published to the pumpcontrollertogglestatus queue" +
+            " When the get /pump-controller/state endpoint is hit" +
+            " Then the response is 500 Internal server error with the Zalando problem and detail says 'An invalid message has been published to the pumpcontrollertogglestatus queue. The message can only be one o 'ON' or 'OFF'")
+    @DirtiesContext
+    void canGetZalandoProblemResponseWithInvalidMessagePublished(){
+        binding.pumpStateInput().send(MessageBuilder.withPayload("OfF").build());
+
+        ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", Problem.class);
+
+        TestUtil.assertZalandoProblem(responseEntity.getBody(), HttpStatus.INTERNAL_SERVER_ERROR, "An invalid message has been published to the pumpcontrollertogglestatus queue. The message can only be one o 'ON' or 'OFF'");
     }
 
     @Test
@@ -191,6 +205,6 @@ class PumpControllerControllerIntegrationTest {
     void canGetZalandoProblemResponseWithNoPumpControllerStatePublished(){
         ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "control-hub-backend/pump-controller/state", Problem.class);
 
-        TestUtil.assertZalandoProblem(responseEntity.getBody(), responseEntity.getStatusCode(), "The pump controller state has not been sent to the control hub. The state cannot be determined.");
+        TestUtil.assertZalandoProblem(responseEntity.getBody(), HttpStatus.BAD_REQUEST, "The pump controller state has not been sent to the control hub. The state cannot be determined.");
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
+import quintin.raspberrypi.control_hub.domain.PumpState;
 import quintin.raspberrypi.control_hub.exception.RaspberryPiControlHubException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -21,29 +22,41 @@ public class PumpControllerServiceUnitTest {
     private ControlHubChannels binding;
 
     @Test
-    @DisplayName("Given the 'on' state has been published to the pumpcontrollertogglestatus queue" +
+    @DisplayName("Given the 'ON' state has been published to the pumpcontrollertogglestatus queue" +
             " When pumpControllerService getPumpControllerStatus method called" +
-            " Then the returned value is 'on'")
+            " Then the returned value is PumpState.ON")
     @DirtiesContext
     void canGetPumpControllerStateOn(){
-        binding.pumpStateInput().send(MessageBuilder.withPayload("on").build());
+        binding.pumpStateInput().send(MessageBuilder.withPayload("ON").build());
 
-        String pumpControllerState = pumpControllerService.getPumpControllerStatus();
+        PumpState pumpControllerState = pumpControllerService.getPumpControllerStatus();
 
-        assertThat(pumpControllerState).isEqualToIgnoringCase("on");
+        assertThat(pumpControllerState).isEqualTo(PumpState.ON);
     }
 
     @Test
-    @DisplayName("Given the 'off' state has been published to the pumpcontrollertogglestatus queue" +
+    @DisplayName("Given the 'OFF' state has been published to the pumpcontrollertogglestatus queue" +
             " When pumpControllerService getPumpControllerStatus method called" +
-            " Then the returned value is 'on'")
+            " Then the returned value is PumpState.OFF")
     @DirtiesContext
     void canGetPumpControllerStateOff(){
-        binding.pumpStateInput().send(MessageBuilder.withPayload("off").build());
+        binding.pumpStateInput().send(MessageBuilder.withPayload("OFF").build());
 
-        String pumpControllerState = pumpControllerService.getPumpControllerStatus();
+        PumpState pumpControllerState = pumpControllerService.getPumpControllerStatus();
 
-        assertThat(pumpControllerState).isEqualToIgnoringCase("off");
+        assertThat(pumpControllerState).isEqualTo(PumpState.OFF);
+    }
+
+    @Test
+    @DisplayName("Given the message 'OfF' has been published to the pumpcontrollertogglestatus queue" +
+            " When pumpControllerService getPumpControllerStatus method called " +
+            " Then a RaspberryPiControlHubException is thrown with the message 'An invalid message has been published to the pumpcontrollertogglestatus queue. The message can only be one o 'ON' or 'OFF''")
+    void canGetExceptionWithInvalidQueueMessage(){
+        binding.pumpStateInput().send(MessageBuilder.withPayload("OfF").build());
+        assertThatThrownBy(()->{
+            pumpControllerService.getPumpControllerStatus();
+        }).isInstanceOf(RaspberryPiControlHubException.class)
+        .hasMessage("An invalid message has been published to the pumpcontrollertogglestatus queue. The message can only be one o 'ON' or 'OFF'");
     }
 
     @Test

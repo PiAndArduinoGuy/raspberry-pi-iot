@@ -11,3 +11,10 @@
 <ng-template #noAvgAmbientTempReadingYetDisplay>
   <p class="alert alert-warning">An average ambient temperature reading could not yet be claculated.</p>
 </ng-template>
+
+<p *ngIf="!noPumpControllerState; else noPumpControllerStateDisplay"class="alert alert-info">
+  The pump is: {{pumpControllerState}}
+</p>
+<ng-template #noPumpControllerStateDisplay>
+  <p class="alert alert-warning">The state of the pump controller could not be fetched.</p>
+</ng-template>
