@@ -9,10 +9,12 @@ spring:
   cloud:
     stream:
       bindings:
-        input:
+        updatedPumpConfigInput:
           destination: pumpconfigupdate
-        output:
+        newTempOutput:
           destination: ambienttemp
+        pumpControllerStateOutput:
+          destination: pumpcontrollertogglestatus
 
 
 control-hub:

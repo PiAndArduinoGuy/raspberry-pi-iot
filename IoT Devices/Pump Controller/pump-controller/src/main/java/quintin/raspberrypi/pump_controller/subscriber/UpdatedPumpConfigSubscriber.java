@@ -7,13 +7,14 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import quintin.raspberrypi.pump_controller.channel.PumpControllerChannels;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.exception.PumpControllerException;
 import quintin.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
 import quintin.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 
 @Slf4j
-@EnableBinding(Sink.class)
+@EnableBinding(PumpControllerChannels.class)
 public class UpdatedPumpConfigSubscriber {
     private RestTemplate restTemplate;
     private PumpConfig pumpConfig;
@@ -28,7 +29,7 @@ public class UpdatedPumpConfigSubscriber {
         this.pumpOverrideStatusObservable = pumpOverrideStatusObservable;
     }
 
-    @StreamListener(Sink.INPUT)
+    @StreamListener(PumpControllerChannels.UPDATED_PUMP_CONFIG_INPUT)
     public void sendPumpUpdateConfigToObservers(String msg) {
         log.info(String.format("Received - %s", msg));
         if (msg.equals("Pump configuration updated")) {
