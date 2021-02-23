@@ -7,6 +7,7 @@ import org.springframework.cloud.stream.messaging.Sink;
 import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
 import quintin.raspberrypi.control_hub.observable.LatestAmbientTempReadingObservable;
 import quintin.raspberrypi.control_hub.observable.LatestFifteenAmbientTempReadingsObservable;
+import quintin.raspberrypi.control_hub.observer.LatestTemperaturesObserver;
 import quintin.raspberrypi.control_hub.service.PumpControllerService;
 
 import java.util.ArrayList;
@@ -19,11 +20,13 @@ public class AmbientTempReadingSubscriber {
     private LatestAmbientTempReadingObservable latestAmbientTempReadingObservable;
 
     @Autowired
-    public AmbientTempReadingSubscriber(LatestFifteenAmbientTempReadingsObservable latestFifteenAmbientTempReadingsObservable, LatestAmbientTempReadingObservable latestAmbientTempReadingObservable, PumpControllerService pumpControllerService) {
+    public AmbientTempReadingSubscriber(LatestFifteenAmbientTempReadingsObservable latestFifteenAmbientTempReadingsObservable,
+                                        LatestAmbientTempReadingObservable latestAmbientTempReadingObservable,
+                                        LatestTemperaturesObserver latestTemperaturesObserver) {
         this.latestFifteenAmbientTempReadingsObservable = latestFifteenAmbientTempReadingsObservable;
         this.latestAmbientTempReadingObservable = latestAmbientTempReadingObservable;
-        this.latestFifteenAmbientTempReadingsObservable.addObserver(pumpControllerService);
-        this.latestAmbientTempReadingObservable.addObserver(pumpControllerService);
+        this.latestFifteenAmbientTempReadingsObservable.addObserver(latestTemperaturesObserver);
+        this.latestAmbientTempReadingObservable.addObserver(latestTemperaturesObserver);
         ambientTempReadings = new ArrayList();
     }
 
