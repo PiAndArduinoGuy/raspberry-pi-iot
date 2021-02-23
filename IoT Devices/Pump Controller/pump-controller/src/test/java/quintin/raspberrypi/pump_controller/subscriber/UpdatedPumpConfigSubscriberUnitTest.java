@@ -8,16 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.client.RestTemplate;
 import quintin.raspberrypi.pump_controller.channel.PumpControllerChannels;
 import quintin.raspberrypi.pump_controller.data.OverrideStatus;
-import quintin.raspberrypi.pump_controller.data.Problem;
 import quintin.raspberrypi.pump_controller.data.PumpConfig;
 import quintin.raspberrypi.pump_controller.domain.AmbientTempReader;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
@@ -30,10 +25,8 @@ import quintin.raspberrypi.pump_controller.runner.PumpControllerInitializer;
 import java.util.Observable;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class UpdatedPumpConfigSubscriberUnitTest {
@@ -75,35 +68,25 @@ class UpdatedPumpConfigSubscriberUnitTest {
     private UpdatedPumpConfigSubscriber updatedPumpConfigSubscriber;
 
     @Captor
-    ArgumentCaptor<String> messageCaptor;
+    ArgumentCaptor<PumpConfig> messageCaptor;
 
     @Test
     void givenPumpConfigurationMessageSent_whenPumpConfigUpdateMessageReceived_thenMessageMustBeSentToOutputPipe() throws Exception {
         // Given
-        PumpConfig mockPumpConfigResponse = new PumpConfig();
-        mockPumpConfigResponse.setOverrideStatus(OverrideStatus.NONE);
-        mockPumpConfigResponse.setTurnOnTemp(20.00);
-        when(mockControlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class))
-                .thenReturn(new ResponseEntity<>(mockPumpConfigResponse, HttpStatus.OK));
+        PumpConfig newPumpConfig = new PumpConfig();
+        newPumpConfig.setOverrideStatus(OverrideStatus.NONE);
+        newPumpConfig.setTurnOnTemp(20.00);
 
         // When
-        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("Pump configuration updated").build());
+        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload(newPumpConfig).build());
 
         // Then
         verify(updatedPumpConfigSubscriber).sendPumpUpdateConfigToObservers(messageCaptor.capture());
-        String receivedMessage = messageCaptor.getValue();
-        assertThat(receivedMessage).isEqualToIgnoringCase("Pump configuration updated");
+        PumpConfig receivedMessage = messageCaptor.getValue();
+        assertThat(receivedMessage.getOverrideStatus()).isEqualTo(newPumpConfig.getOverrideStatus());
+        assertThat(receivedMessage.getTurnOnTemp()).isEqualTo(newPumpConfig.getTurnOnTemp());
     }
 
-    @Test
-    void givenMessageSentNotRecognizedByPumpController_whenMessageReceived_thenExceptionThrownStatingMessageNotRecognized() {
-        assertThatThrownBy(() -> {
-            binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("A message that should not be recognized").build());
-
-        }).isInstanceOf(MessagingException.class)
-                .hasMessageContaining("A message was received that is not recognized - Expected the message 'Pump configuration updated' but received 'A message that should not be recognized'");
-
-    }
 
     @Test
     @DisplayName("Given the overrideStatus of the PumpConfig has changed" +
@@ -111,15 +94,13 @@ class UpdatedPumpConfigSubscriberUnitTest {
             "Then it knows the OverrideStatus has changed and updates the PumpOverrideObservable and notifies the AutomaticPumpToggler and ManualPumpToggler observers of the change")
     void canNotifyOfUpdatedOverrideStatus() {
         // Given
-        PumpConfig mockPumpConfigResponse = new PumpConfig();
-        mockPumpConfigResponse.setOverrideStatus(OverrideStatus.NONE);
-        when(mockControlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class))
-                .thenReturn(new ResponseEntity<>(mockPumpConfigResponse, HttpStatus.OK));
+        PumpConfig newPumpConfig = new PumpConfig();
+        newPumpConfig.setOverrideStatus(OverrideStatus.NONE);
         pumpOverrideStatusObservable.addObserver(automaticPumpToggler);
         pumpOverrideStatusObservable.addObserver(manualPumpToggler);
 
         // When
-        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("Pump configuration updated").build());
+        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload(newPumpConfig).build());
 
         // Then
         verify(automaticPumpToggler).update(any(Observable.class), any(OverrideStatus.class));
@@ -132,35 +113,14 @@ class UpdatedPumpConfigSubscriberUnitTest {
             "Then it knows the turnOnTemperature has changed and updates the TurnOnTemperatureObservable class and notifies the AutomaticPumpToggler observers of the change")
     void canNotifyOfUpdatedTurnOnTemperature() {
         // Given
-        PumpConfig mockPumpConfigResponse = new PumpConfig();
-        mockPumpConfigResponse.setTurnOnTemp(20.00);
-        when(mockControlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class))
-                .thenReturn(new ResponseEntity<>(mockPumpConfigResponse, HttpStatus.OK));
+        PumpConfig newPumpConfig = new PumpConfig();
+        newPumpConfig.setTurnOnTemp(20.00);
         pumpTurnOnTempObservable.addObserver(automaticPumpToggler);
 
         // When
-        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("Pump configuration updated").build());
+        binding.updatedPumpConfigInput().send(MessageBuilder.withPayload(newPumpConfig).build());
 
         // Then
         verify(automaticPumpToggler).update(any(Observable.class), any(Double.class));
-    }
-
-    @Test
-    @DisplayName("Given a status code other than 200 is received from the control hub" +
-            "When an update to the PumpConfig is received" +
-            "Then a PumpControllerException is thrown")
-    void canThrowException() {
-
-        // Given
-        Problem zolandoProblem = new Problem(HttpStatus.BAD_REQUEST.getReasonPhrase(), HttpStatus.BAD_REQUEST.value(), "The request could not be serviced.");
-        when(mockControlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class))
-                .thenReturn(new ResponseEntity<>(zolandoProblem, HttpStatus.BAD_GATEWAY));
-
-        // When and Then
-        assertThatThrownBy(() -> {
-            binding.updatedPumpConfigInput().send(MessageBuilder.withPayload("Pump configuration updated").build());
-        }).isInstanceOf(MessagingException.class)
-                .hasMessageContaining("The updated pump config could not be retrieved from the control hub, the response was: Problem(title=Bad Request, status=400, detail=The request could not be serviced.)");
-
     }
 }
