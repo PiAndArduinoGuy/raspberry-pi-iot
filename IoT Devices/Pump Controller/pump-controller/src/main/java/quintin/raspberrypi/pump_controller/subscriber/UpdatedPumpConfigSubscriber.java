@@ -35,17 +35,6 @@ public class UpdatedPumpConfigSubscriber {
         notifyRelevantObserverOfPumpConfigAttributeChange(newPumpConfig);
     }
 
-//    private PumpConfig getUpdatedPumpConfig() {
-//        ResponseEntity<Object> responseEntity = this.restTemplate.getForEntity("/pump-configuration", Object.class);
-//        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-//            return (PumpConfig) responseEntity.getBody();
-//        }
-//        PumpControllerException pumpControllerException = new PumpControllerException(String.format("The updated pump config could not be retrieved from the control hub, the response was: %s", responseEntity.getBody().toString()));
-//
-//        log.error("A response other than 2xx was received from the control hub.", pumpControllerException);
-//        throw pumpControllerException;
-//    }
-
     private void notifyRelevantObserverOfPumpConfigAttributeChange(PumpConfig updatedPumpConfig) {
         if (hasOverrideStatusChanged(updatedPumpConfig)) {
             log.info("The override status has been updated.");
