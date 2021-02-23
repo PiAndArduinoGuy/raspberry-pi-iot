@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @SpringBootTest
-public class PumpControllerServiceUnitTest {
+class PumpControllerServiceUnitTest {
     @Autowired
     private PumpControllerService pumpControllerService;
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
+import org.springframework.test.annotation.DirtiesContext;
 import quintin.raspberrypi.control_hub.OverrideStatus;
 import quintin.raspberrypi.control_hub.PumpConfig;
 import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
@@ -26,6 +27,7 @@ class UpdatedPumpConfigPublisherUnitTest {
     private UpdatedPumpConfigPublisher updatedPumpConfigPublisher;
 
     @Test
+    @DirtiesContext
     void canSendPumpConfig() throws Exception{
         PumpConfig newPumpConfig = new PumpConfig(20.00, OverrideStatus.PUMP_OFF);
 

@@ -11,6 +11,7 @@ import quintin.raspberrypi.control_hub.PumpConfig;
 import quintin.raspberrypi.control_hub.exception.RaspberryPiControlHubException;
 import quintin.raspberrypi.control_hub.observable.LatestAmbientTempReadingObservable;
 import quintin.raspberrypi.control_hub.observable.LatestFifteenAmbientTempReadingsObservable;
+import quintin.raspberrypi.control_hub.observer.LatestTemperaturesObserver;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
-class PumpConfigServiceTestUnitTest {
+class PumpConfigServiceUnitTest {
     @Autowired
     private PumpControllerService pumpControllerService;
 
@@ -31,6 +32,9 @@ class PumpConfigServiceTestUnitTest {
 
     @Autowired
     private PumpConfigService pumpConfigService;
+
+    @Autowired
+    private LatestTemperaturesObserver latestTemperaturesObserver;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -64,7 +68,7 @@ class PumpConfigServiceTestUnitTest {
             " When the latestAmbientTempReading attribute changes state in LatestAmbientTempReadingObservable" +
             " Then the latestAmbientTemp attribute in the PumpControllerService is updated")
     void latestAmbientTempReadingObserverActsWhenObservableChangesState(){
-        latestAmbientTempReadingObservable.addObserver(pumpControllerService);
+        latestAmbientTempReadingObservable.addObserver(latestTemperaturesObserver);
 
         latestAmbientTempReadingObservable.setLatestAmbientTempReading(12.00);
 
@@ -77,7 +81,7 @@ class PumpConfigServiceTestUnitTest {
             " When the latestFifteenAmbientTempReadings attribute changes state in LatestFifteenAmbientTempReadingsObservable" +
             " Then the latestFifteenAmbientTempReadingAvg is calculated and stored in the PumpControllerService")
     void withLatestFifteenAmbientTempReadingsCanCalculateLatestFifteenAmbientTempReadingAvg(){
-        latestFifteenAmbientTempReadingsObservable.addObserver(pumpControllerService);
+        latestFifteenAmbientTempReadingsObservable.addObserver(latestTemperaturesObserver);
 
         List<Double> latestFifteenAmbientTempReadings = new ArrayList<>();
         for(int i=20; i <35; i++){
