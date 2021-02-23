@@ -30,30 +30,9 @@ public class UpdatedPumpConfigSubscriber {
     }
 
     @StreamListener(PumpControllerChannels.UPDATED_PUMP_CONFIG_INPUT)
-    public void sendPumpUpdateConfigToObservers(String msg) {
-        log.info(String.format("Received - %s", msg));
-        if (msg.equals("Pump configuration updated")) {
-            PumpConfig updatedPumpConfig = getUpdatedPumpConfig();
-            notifyRelevantObserverOfPumpConfigAttributeChange(updatedPumpConfig);
-        } else {
-            PumpControllerException pumpControllerException = new PumpControllerException(String.format(
-                    "A message was received that is not recognized - Expected the message 'Pump configuration updated' but received '%s'"
-                    , msg));
-            log.error(
-                    "A message was received that is not recognized", pumpControllerException);
-            throw pumpControllerException;
-        }
-    }
-
-    private PumpConfig getUpdatedPumpConfig() {
-        ResponseEntity<Object> responseEntity = this.restTemplate.getForEntity("/pump-configuration", Object.class);
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            return (PumpConfig) responseEntity.getBody();
-        }
-        PumpControllerException pumpControllerException = new PumpControllerException(String.format("The updated pump config could not be retrieved from the control hub, the response was: %s", responseEntity.getBody().toString()));
-
-        log.error("A response other than 2xx was received from the control hub.", pumpControllerException);
-        throw pumpControllerException;
+    public void sendPumpUpdateConfigToObservers(PumpConfig newPumpConfig) {
+        log.info(String.format("Received - %s", newPumpConfig.toString()));
+        notifyRelevantObserverOfPumpConfigAttributeChange(newPumpConfig);
     }
 
     private void notifyRelevantObserverOfPumpConfigAttributeChange(PumpConfig updatedPumpConfig) {
