@@ -7,7 +7,7 @@ import quintin.raspberrypi.control_hub.domain.PumpState;
 import quintin.raspberrypi.control_hub.exception.RaspberryPiControlHubException;
 import quintin.raspberrypi.control_hub.observable.LatestAmbientTempReadingObservable;
 import quintin.raspberrypi.control_hub.observable.LatestFifteenAmbientTempReadingsObservable;
-import quintin.raspberrypi.control_hub.subscriber.PumpControllerStateSubscriber;
+import quintin.raspberrypi.control_hub.subscriber.PumpStateSubscriber;
 
 import java.util.List;
 import java.util.Observable;
@@ -18,13 +18,13 @@ import java.util.Optional;
 public class PumpControllerService implements Observer {
     private Optional<Double> latestAmbientTempReading;
     private Optional<Double> latestFifteenAmbientTempReadingsAvg;
-    private PumpControllerStateSubscriber pumpControllerStateSubscriber;
+    private PumpStateSubscriber pumpStateSubscriber;
 
     @Autowired
-    public PumpControllerService(PumpControllerStateSubscriber pumpControllerStateSubscriber) {
+    public PumpControllerService(PumpStateSubscriber pumpStateSubscriber) {
         this.latestFifteenAmbientTempReadingsAvg = Optional.empty();
         this.latestAmbientTempReading = Optional.empty();
-        this.pumpControllerStateSubscriber = pumpControllerStateSubscriber;
+        this.pumpStateSubscriber = pumpStateSubscriber;
 
     }
 
@@ -61,7 +61,7 @@ public class PumpControllerService implements Observer {
     }
 
     public PumpState getPumpControllerStatus() {
-        Optional<String> optionalPumpState = pumpControllerStateSubscriber.getOptionalPumpControllerState();
+        Optional<String> optionalPumpState = pumpStateSubscriber.getOptionalPumpState();
         if (optionalPumpState.isPresent()){
             if (optionalPumpState.get().equals("ON")){
                 return PumpState.ON;

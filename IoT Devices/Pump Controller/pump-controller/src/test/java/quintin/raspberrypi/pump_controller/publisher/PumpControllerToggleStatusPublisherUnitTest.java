@@ -9,6 +9,7 @@ import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.web.client.RestTemplate;
 import quintin.raspberrypi.pump_controller.channel.PumpControllerChannels;
+import quintin.raspberrypi.pump_controller.domain.PumpState;
 import quintin.raspberrypi.pump_controller.domain.PumpToggler;
 import quintin.raspberrypi.pump_controller.runner.PumpControllerInitializer;
 
@@ -37,9 +38,9 @@ class PumpControllerToggleStatusPublisherUnitTest {
             " When the publishUpdate method called" +
             " Then the pumpControllerStatus 'on' is published to the pumpcontrollertogglestatus queue")
     void canPublishToQueue(){
-        pumpControllerToggleStatusPublisher.publishUpdate("on");
+        pumpControllerToggleStatusPublisher.publishUpdate(PumpState.ON);
 
         String pumpControllerStatus = (String) messageCollector.forChannel(binding.pumpControllerStateOutput()).poll().getPayload();
-        assertThat(pumpControllerStatus).isEqualToIgnoringCase("on");
+        assertThat(pumpControllerStatus).isEqualTo("ON");
     }
 }
