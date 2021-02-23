@@ -11,17 +11,21 @@ import { BackendHttpRequestsService } from '../backend-http-requests.service';
 export class PumpControllerDashboardComponent implements OnInit {
   latestAmbientTempReading: number ;
   latestAvgAmbientTempReading: number;
+  pumpControllerState: string;
   noAvgAmbientTempReadingYet: boolean;
   noAmbientTempReadingYet: boolean;
+  noPumpControllerState: boolean;
   updateAmbientTempReadings: Subscription;
   constructor(private backendHttpRequestsService: BackendHttpRequestsService) { }
 
   ngOnInit(): void {
     this.performLatestAmbientTempReadingCheck();
     this.performLatestAvgAmbientTempReadingCheck();
+    this.performPumpControllerStateCheck();
     this.updateAmbientTempReadings = interval(100000).subscribe(() => {
         this.performLatestAmbientTempReadingCheck();
         this.performLatestAvgAmbientTempReadingCheck();
+        this.performPumpControllerStateCheck();
     })
   }
 
@@ -51,7 +55,7 @@ export class PumpControllerDashboardComponent implements OnInit {
       console.log(this.noAvgAmbientTempReadingYet);
     },
     (error: HttpErrorResponse)=>{
-      // alert-warning class applied with message that latest average temp reading cannot yet be calculated
+      console.log(error.error)
       if(error.error.status = 400 && error.error.detail == '15 ambient temperature readings have not yet been captured, an average could not be calculated'){
         console.log(error.error.detail)
         this.noAvgAmbientTempReadingYet = true;
@@ -60,6 +64,22 @@ export class PumpControllerDashboardComponent implements OnInit {
       }
     });
     
+  }
+
+  private performPumpControllerStateCheck(){
+    this.backendHttpRequestsService.getPumpControllerState().subscribe(response => {
+      this.pumpControllerState = response;
+      this.noPumpControllerState = false;
+    },
+    (error: HttpErrorResponse) => {
+      console.log(error.error)
+      if(error.error.status = 400 && error.error.detail == 'The pump controller state has not been sent to the control hub. The state cannot be determined.'){
+        console.log(error.error.detail);
+        this.noPumpControllerState = true;
+      }else{
+        console.error(error)
+      }
+    });
   }
 
 }

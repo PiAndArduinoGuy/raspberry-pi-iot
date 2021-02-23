@@ -32,4 +32,8 @@ export class BackendHttpRequestsService {
   getLatestAvgAmbientTempReading(): Observable<number>{
     return this.http.get<number>(this.baseUrl + '/latest-average-ambient-temp-reading');
   }
+
+  getPumpControllerState(): Observable<string> {
+    return this.http.get<string>(this.baseUrl + '/state')
+  }
 }

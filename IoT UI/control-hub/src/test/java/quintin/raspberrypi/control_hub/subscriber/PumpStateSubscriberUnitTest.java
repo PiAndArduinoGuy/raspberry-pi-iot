@@ -11,13 +11,13 @@ import quintin.raspberrypi.control_hub.channel.ControlHubChannels;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
-class PumpControllerStateSubscriberUnitTest {
+class PumpStateSubscriberUnitTest {
 
     @Autowired
     private ControlHubChannels controlHubChannels;
 
     @Autowired
-    private PumpControllerStateSubscriber pumpControllerStateSubscriber;
+    private PumpStateSubscriber pumpStateSubscriber;
 
 
     @DisplayName("Given the 'on' state has been published to the pumpcontrollertogglestatus queue" +
@@ -27,7 +27,7 @@ class PumpControllerStateSubscriberUnitTest {
     void canGetOnStateMessage(){
         controlHubChannels.pumpStateInput().send(MessageBuilder.withPayload("on").build());
 
-        String pumpControllerLatestState = pumpControllerStateSubscriber.getOptionalPumpControllerState().get();
+        String pumpControllerLatestState = pumpStateSubscriber.getOptionalPumpState().get();
         assertThat(pumpControllerLatestState).isEqualToIgnoringCase("on");
     }
 

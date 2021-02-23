@@ -3,10 +3,11 @@ package quintin.raspberrypi.control_hub.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import quintin.raspberrypi.control_hub.domain.PumpState;
 import quintin.raspberrypi.control_hub.exception.RaspberryPiControlHubException;
 import quintin.raspberrypi.control_hub.observable.LatestAmbientTempReadingObservable;
 import quintin.raspberrypi.control_hub.observable.LatestFifteenAmbientTempReadingsObservable;
-import quintin.raspberrypi.control_hub.subscriber.PumpControllerStateSubscriber;
+import quintin.raspberrypi.control_hub.subscriber.PumpStateSubscriber;
 
 import java.util.List;
 import java.util.Observable;
@@ -17,13 +18,13 @@ import java.util.Optional;
 public class PumpControllerService implements Observer {
     private Optional<Double> latestAmbientTempReading;
     private Optional<Double> latestFifteenAmbientTempReadingsAvg;
-    private PumpControllerStateSubscriber pumpControllerStateSubscriber;
+    private PumpStateSubscriber pumpStateSubscriber;
 
     @Autowired
-    public PumpControllerService(PumpControllerStateSubscriber pumpControllerStateSubscriber) {
+    public PumpControllerService(PumpStateSubscriber pumpStateSubscriber) {
         this.latestFifteenAmbientTempReadingsAvg = Optional.empty();
         this.latestAmbientTempReading = Optional.empty();
-        this.pumpControllerStateSubscriber = pumpControllerStateSubscriber;
+        this.pumpStateSubscriber = pumpStateSubscriber;
 
     }
 
@@ -59,9 +60,17 @@ public class PumpControllerService implements Observer {
         });
     }
 
-    public String getPumpControllerStatus() {
-        return pumpControllerStateSubscriber.getOptionalPumpControllerState().<RaspberryPiControlHubException>orElseThrow(() -> {
-            throw new RaspberryPiControlHubException("The pump controller state has not been sent to the control hub. The state cannot be determined.", HttpStatus.BAD_REQUEST);
-        });
+    public PumpState getPumpControllerStatus() {
+        Optional<String> optionalPumpState = pumpStateSubscriber.getOptionalPumpState();
+        if (optionalPumpState.isPresent()){
+            if (optionalPumpState.get().equals("ON")){
+                return PumpState.ON;
+            } else if(optionalPumpState.get().equals("OFF")){
+                return PumpState.OFF;
+            } else {
+                throw new RaspberryPiControlHubException("An invalid message has been published to the pumpcontrollertogglestatus queue. The message can only be one o 'ON' or 'OFF'", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+        throw new RaspberryPiControlHubException("The pump controller state has not been sent to the control hub. The state cannot be determined.", HttpStatus.BAD_REQUEST);
     }
 }

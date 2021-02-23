@@ -10,11 +10,11 @@ import java.util.Optional;
 
 @EnableBinding(ControlHubChannels.class)
 @Getter
-public class PumpControllerStateSubscriber {
-    private Optional<String> optionalPumpControllerState = Optional.empty();
+public class PumpStateSubscriber {
+    private Optional<String> optionalPumpState = Optional.empty();
 
     @StreamListener(ControlHubChannels.PUMP_STATE_INPUT)
-    public void setPumpControllerState(String latestPumpControllerState){
-        this.optionalPumpControllerState = Optional.of(latestPumpControllerState);
+    public void setPumpState(String latestPumpControllerState){
+        this.optionalPumpState = Optional.of(latestPumpControllerState);
     }
 }
