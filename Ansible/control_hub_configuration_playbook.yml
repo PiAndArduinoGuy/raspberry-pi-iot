@@ -1,0 +1,16 @@
+---
+- name: Deploy and start the control-hub application.
+  hosts: control_hub
+  pre_tasks:
+    - name: Set control hub deploy base folder location
+      set_fact:
+        base_control_hub_deploy_location: /Desktop/Control\ Hub
+    - name: Set control hub stage base folder location
+      set_fact:
+        base_control_hub_stage_location: /Desktop/raspberry-pi-iot
+      
+  roles:
+    - install_deployment_pre_requisites
+    - stage_control_hub
+    - deploy_control_hub
+    - build_control_hub

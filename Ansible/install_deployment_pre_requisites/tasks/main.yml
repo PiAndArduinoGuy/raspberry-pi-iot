@@ -1,0 +1,52 @@
+---
+# tasks file for install_deployment_pre_requisites
+- name: Install Java 8.
+  become: yes
+  apt:
+    name: openjdk-8-jdk
+
+- name: Set default Java version to Java 8.
+  become: yes
+  shell: 'sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-armhf'
+
+
+- name: Check default Java version.
+  shell: 'java -version'
+  register: java_version_check_output
+
+- debug: 
+    msg: "{{java_version_check_output}}"
+
+- name: Installing maven.
+  become: yes
+  apt:
+    name: maven
+
+- name: Install curl.
+  become: yes
+  apt:
+    name: curl
+
+- name: Install Node Version Manager using curl.
+  become: yes
+  uri: 
+    url: 'https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh'
+
+- name: Get nvm version.
+  shell: 'nvm -v'
+  register: nvm_version
+
+- debug:
+    msg: "The nvm version installed is {{nvm_version}}"
+
+- name: Install node version 11.15.0 using nvm.
+  become: yes
+  shell: 'nvm install 11.15.0' # this version support Arm6 architecture
+
+- name: Get node version.
+  shell: 'node -v'
+  register: node_version
+
+- debug:
+    msg: "The node version installed is {{node_version}}"
+

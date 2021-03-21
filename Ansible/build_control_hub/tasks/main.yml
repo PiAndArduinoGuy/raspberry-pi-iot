@@ -1,0 +1,14 @@
+---
+# tasks file for build_control_hub
+- name: Building control-hub backend project.
+  shell: 'sudo mvn clean install -f {{base_control_hub_deploy_location}}/control-hub/pom.xml -DskipTests'
+
+- name: Echo contents of the target folder
+  shell: 'ls {{base_control_hub_deploy_location}}/control-hub/target'
+  register: target_folder_content
+
+- debug:
+    msg: The contents of the control-hub target folder - {{target_folder_content.stdout}}
+
+- name: Install control-hub-ui project using npm.
+  shell: 'cd {{base_control_hub_deploy_location}}/control-hub-ui/raspberry-pi-control-hub-ui && sudo npm install --production'
