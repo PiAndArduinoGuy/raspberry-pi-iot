@@ -7,7 +7,6 @@
     <groupId>quintin.raspberrypi</groupId>
     <artifactId>control-hub</artifactId>
     <version>20210302</version>
-    <packaging>war</packaging>
 
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -88,6 +87,10 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
