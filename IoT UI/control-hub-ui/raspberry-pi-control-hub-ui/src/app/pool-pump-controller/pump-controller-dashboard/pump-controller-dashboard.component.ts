@@ -22,7 +22,7 @@ export class PumpControllerDashboardComponent implements OnInit {
     this.performLatestAmbientTempReadingCheck();
     this.performLatestAvgAmbientTempReadingCheck();
     this.performPumpControllerStateCheck();
-    this.updateAmbientTempReadings = interval(5000).subscribe(() => {
+    this.updateAmbientTempReadings = interval(100000).subscribe(() => {
         this.performLatestAmbientTempReadingCheck();
         this.performLatestAvgAmbientTempReadingCheck();
         this.performPumpControllerStateCheck();
@@ -45,7 +45,7 @@ export class PumpControllerDashboardComponent implements OnInit {
         console.log(error)
       }
     });
-    
+
   }
 
   private performLatestAvgAmbientTempReadingCheck() {
@@ -63,7 +63,7 @@ export class PumpControllerDashboardComponent implements OnInit {
         console.error(error);
       }
     });
-    
+
   }
 
   private performPumpControllerStateCheck(){
