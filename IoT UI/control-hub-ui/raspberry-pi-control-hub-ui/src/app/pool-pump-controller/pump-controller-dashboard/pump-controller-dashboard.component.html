@@ -2,7 +2,7 @@
   Latest ambient temperature: {{latestAmbientTempReading| number:'1.2-2'}} &#8451;
 </p>
 <ng-template #noAmbientTempReadingYetDisplay>
-  <p class="alert alert-warning">An ambient temperature reading yet.</p>
+  <p class="alert alert-warning">An ambient temperature reading has not yet been received.</p>
 </ng-template>
 
 <p *ngIf="!noAvgAmbientTempReadingYet; else noAvgAmbientTempReadingYetDisplay"class="alert alert-info">

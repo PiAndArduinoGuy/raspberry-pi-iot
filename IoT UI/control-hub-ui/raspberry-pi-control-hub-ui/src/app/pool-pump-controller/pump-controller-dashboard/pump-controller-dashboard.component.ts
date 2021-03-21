@@ -45,7 +45,7 @@ export class PumpControllerDashboardComponent implements OnInit {
         console.log(error)
       }
     });
-    
+
   }
 
   private performLatestAvgAmbientTempReadingCheck() {
@@ -63,7 +63,7 @@ export class PumpControllerDashboardComponent implements OnInit {
         console.error(error);
       }
     });
-    
+
   }
 
   private performPumpControllerStateCheck(){
