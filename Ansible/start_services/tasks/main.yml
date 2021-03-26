@@ -1,0 +1,11 @@
+---
+# tasks file for start_services
+- name: Start the control-hub backend.
+  become: yes
+  systemd:
+    state: started
+    name: control-hub-backend
+# - name: Start tomcat server to host the control-hub frontend.
+#   systemd:
+#     state: started
+#     name: tomcat-start

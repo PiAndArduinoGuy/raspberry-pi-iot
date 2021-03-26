@@ -1,14 +1,22 @@
----
+---ment_pre_requisites
+    - stage_control_hub
+    - build_control_hub
 # tasks file for build_control_hub
 - name: Building control-hub backend project.
-  shell: 'sudo mvn clean install -f {{base_control_hub_deploy_location}}/control-hub/pom.xml -DskipTests'
+  shell: 'sudo mvn clean install -f "/tmp/raspberry-pi-iot/IoT UI/control-hub/pom.xml" -DskipTests'
 
 - name: Echo contents of the target folder
-  shell: 'ls {{base_control_hub_deploy_location}}/control-hub/target'
+  shell: 'ls "/tmp/raspberry-pi-iot/IoT UI/control-hub/target"'
   register: target_folder_content
 
 - debug:
     msg: The contents of the control-hub target folder - {{target_folder_content.stdout}}
 
-- name: Install control-hub-ui project using npm.
-  shell: 'cd {{base_control_hub_deploy_location}}/control-hub-ui/raspberry-pi-control-hub-ui && sudo npm install --production'
+- name: Install control-hub-ui project dependencies using npm.
+  become: yes
+  npm:
+    path: "/tmp/raspberry-pi-iot/IoT UI/control-hub-ui/raspberry-pi-control-hub-ui/ "
+
+- name: Build control-hub-ui project using ng.
+  become: yes
+  shell: "cd '/tmp/raspberry-pi-iot/IoT UI/control-hub-ui/raspberry-pi-control-hub-ui/' && sudo ng build --prod --base-href=control-hub-frontend"

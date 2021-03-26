@@ -1,0 +1,10 @@
+- name: "Start the {{service_name}} service."
+  become: yes
+  systemd:
+    name: "{{service_name}}"
+    state: started
+- name: "Add the service {{service_name}} to the services to startup at boot."
+  become: yes
+  systemd:
+    name: "{{service_name}}"
+    enabled: yes

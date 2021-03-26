@@ -1,0 +1,8 @@
+# delete any prior creation of services and stop them
+
+- name: "Add control-hub-backend and tomcat_start services to startup at boot list and start the respective services."
+  include_role:
+    name: setup_service
+  vars:
+    - service_name: "{{item}}"
+  with_items: ["control-hub-backend", "tomcat_start"]

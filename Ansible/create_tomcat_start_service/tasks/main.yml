@@ -1,0 +1,9 @@
+---
+# tasks file for create_tomcat_start_service
+- name: Create a systemd service to start the tomcat server hosting the control-hub-frontend.
+  become: yes
+  template:
+    src: service.j2
+    dest: "{{base_services_location}}/tomcat_start.service"
+    owner: root
+    mode: "777" # user, group and other have full permissions on this file

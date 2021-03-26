@@ -3,12 +3,12 @@
 - name: Clear previous stage.
   become: yes
   file:
-    path: /Desktop/raspberry-pi-iot
+    path: /tmp/raspberry-pi-iot
     state: absent
 
-- name: Clonning the RaspberryPi-IoT project to Desktop.
+- name: Clonning the raspberry-pi-iot project to stage location.
   become: yes
   git:
     repo: 'https://github.com/PiAndArduinoGuy/raspberry-pi-iot.git'
-    dest: /Desktop/raspberry-pi-iot
+    dest: /tmp/raspberry-pi-iot
     version: master

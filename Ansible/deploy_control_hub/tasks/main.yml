@@ -3,18 +3,25 @@
 - name: Delete old deploy.
   become: yes
   file:
-    path: "{{base_control_hub_deploy_location}}"
+    path: "{{control_hub_deploy_location}}"
     state: absent
 
-- name: Copying staged control-hub-ui component to /Desktop/Control Hub.
+- name: Copying staged dist component to /usr/local/applications/apache-tomcat-9.0.44/webapps/control-hub-frontend.
   become: yes
   copy:
     remote_src: yes # source is already on the host
-    src: "{{base_control_hub_stage_location}}/IoT UI/control-hub-ui"
-    dest: "{{base_control_hub_deploy_location}}"
-- name: Copying staged control-hub backend component to /Desktop/Control Hub.
+    src: "/tmp/raspberry-pi-iot/IoT UI/control-hub-ui/raspberry-pi-control-hub-ui/dist/raspberry-pi-control-hub-ui/"
+    dest: "{{tomcat_home_directory}}/webapps/control-hub-frontend/"
+
+- name: Create Control Hub Backend directory
+  file:
+    state: directory
+    path: /usr/local/applications/Control Hub Backend
+    mode: "777"
+
+- name: Copying staged control-hub backend jar component to {{control_hub_deploy_location}}.
   become: yes
   copy:
     remote_src: yes
-    src: "{{base_control_hub_stage_location}}/IoT UI/control-hub"
-    dest: "{{base_control_hub_deploy_location}}"
+    src: "/tmp/raspberry-pi-iot/IoT UI/control-hub/target/control-hub-backend.jar"
+    dest: "/usr/local/applications/Control Hub Backend/control-hub-backend.jar"

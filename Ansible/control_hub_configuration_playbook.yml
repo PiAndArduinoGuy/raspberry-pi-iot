@@ -2,15 +2,21 @@
 - name: Deploy and start the control-hub application.
   hosts: control_hub
   pre_tasks:
-    - name: Set control hub deploy base folder location
+    - name: Set control hub deploy base folder location.
       set_fact:
-        base_control_hub_deploy_location: /Desktop/Control\ Hub
-    - name: Set control hub stage base folder location
+        control_hub_deploy_location: /usr/local/applications/Control_Hub
+    - name: Set the tomcat home directory. 
       set_fact:
-        base_control_hub_stage_location: /Desktop/raspberry-pi-iot
+        tomcat_home_directory: /usr/local/applications/apache-tomcat-9.0.44
+    - name: Set services location.
+      set_fact:
+        base_services_location: /etc/systemd/system
       
   roles:
     - install_deployment_pre_requisites
     - stage_control_hub
-    - deploy_control_hub
     - build_control_hub
+    - deploy_control_hub
+    - create_control_hub_backend_service
+    - create_tomcat_start_service
+    - setup_control_hub_services

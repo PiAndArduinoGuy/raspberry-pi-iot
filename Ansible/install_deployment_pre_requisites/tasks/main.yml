@@ -22,31 +22,51 @@
   apt:
     name: maven
 
-- name: Install curl.
+- name: Download and unarchive Arm7 supported version of node.
   become: yes
-  apt:
-    name: curl
+  unarchive: 
+    src: https://nodejs.org/dist/v14.16.0/node-v14.16.0-linux-armv7l.tar.xz
+    dest: /tmp/
+    remote_src: yes
 
-- name: Install Node Version Manager using curl.
+- name: Copy all files of un-tared node package to /usr/local.
   become: yes
-  uri: 
-    url: 'https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh'
+  copy: 
+    dest: /usr/local/
+    src: /tmp/node-v14.16.0-linux-armv7l/
+    mode: "777"
+    remote_src: yes
 
-- name: Get nvm version.
-  shell: 'nvm -v'
-  register: nvm_version
+- name: Get npm version
+  shell: 'npm -v'
+  register: npm_version
 
 - debug:
-    msg: "The nvm version installed is {{nvm_version}}"
+    msg: "NPM version {{npm_version.stdout}}"
 
-- name: Install node version 11.15.0 using nvm.
-  become: yes
-  shell: 'nvm install 11.15.0' # this version support Arm6 architecture
-
-- name: Get node version.
+- name: Get node version
   shell: 'node -v'
   register: node_version
 
 - debug:
-    msg: "The node version installed is {{node_version}}"
+    msg: "Node version {{node_version.stdout}}"
+
+- name: Install angular cli globally using npm.
+  become: yes
+  shell: "npm install -g @angular/cli"
+
+- name: Create directory to hold installed applications.
+  become: yes
+  file:
+    path: /usr/local/applications
+    state: directory
+    mode: "777"
+
+- name: Install Apache Tomcat 9 in directory /usr/local/applications
+  become: yes
+  unarchive:
+    src: https://downloads.apache.org/tomcat/tomcat-9/v9.0.44/bin/apache-tomcat-9.0.44.tar.gz
+    dest: /usr/local/applications/
+    remote_src: yes
+    mode: "777"
 
