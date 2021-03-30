@@ -1,5 +1,5 @@
 ---
-# tasks file for install_deployment_pre_requisites
+## tasks file for install_deployment_pre_requisites
 - name: Install Java 8.
   become: yes
   apt:
@@ -14,7 +14,7 @@
   shell: 'java -version'
   register: java_version_check_output
 
-- debug: 
+- debug:
     msg: "{{java_version_check_output}}"
 
 - name: Installing maven.
@@ -24,14 +24,14 @@
 
 - name: Download and unarchive Arm7 supported version of node.
   become: yes
-  unarchive: 
+  unarchive:
     src: https://nodejs.org/dist/v14.16.0/node-v14.16.0-linux-armv7l.tar.xz
     dest: /tmp/
     remote_src: yes
 
 - name: Copy all files of un-tared node package to /usr/local.
   become: yes
-  copy: 
+  copy:
     dest: /usr/local/
     src: /tmp/node-v14.16.0-linux-armv7l/
     mode: "777"
@@ -69,4 +69,29 @@
     dest: /usr/local/applications/
     remote_src: yes
     mode: "777"
+
+- name: Determine whether docker is installed yet. # Docs mentions that trying to install docker from the script if it has already been installed may cause issues.
+  shell: 'docker -v'
+  register: docker_version
+
+- name: Gather host package installation facts to determine whether docker is installed.
+  ansible.builtin.package_facts:
+    strategy: all
+
+- name: Download the docker install script.
+  become: yes
+  uri:
+    url: https://get.docker.com
+    dest: /tmp/
+  when: "'docker-ce-cli' not in ansible_facts.packages"
+
+- name: Execute the docker get-docker.sh script just downloaded to install docker.
+  become: yes
+  shell: sh /tmp/get-docker.sh
+  when: "'docker-ce-cli' not in ansible_facts.packages"
+
+- name: Pull RabbitMQ and its Management image, expose ports and run the image.
+  become: yes
+  shell: "docker run -d --hostname local-rabbitmq --name control-hub-rmq -p 15672:15672 -p 5672:5672 rabbitmq:3.8.14-management"
+
 
