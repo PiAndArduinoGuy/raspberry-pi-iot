@@ -1,6 +1,4 @@
----ment_pre_requisites
-    - stage_control_hub
-    - build_control_hub
+---
 # tasks file for build_control_hub
 - name: Building control-hub backend project.
   shell: 'sudo mvn clean install -f "/tmp/raspberry-pi-iot/IoT UI/control-hub/pom.xml" -DskipTests'
