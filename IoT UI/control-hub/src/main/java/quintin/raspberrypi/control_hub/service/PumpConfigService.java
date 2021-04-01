@@ -18,7 +18,7 @@ import java.io.IOException;
 public class PumpConfigService {
 
     private final ObjectMapper objectMapper;
-    private static final String PUMP_CONFIG_FILE_LOCATION = "pump/pump_config.json";
+    private static final String PUMP_CONFIG_FILE_LOCATION = "/usr/local/applications/Control Hub Backend/pump/pump_config.json";
 
     @Autowired
     public PumpConfigService(ObjectMapper objectMapper){
