@@ -27,16 +27,16 @@ class RaspberryPiControllerIntegrationTest {
     @LocalServerPort
     private int port;
 
-    @Test
-    void canGetOkResponseForCreatingAValidNewPumpConfigInstance(){
-        ResponseEntity<Void> responseEntity =
-                this.restTemplate.postForEntity(
-                        "http://localhost:"+port+"/control-hub-backend/pump-configuration/new",
-                        new PumpConfig(20.00, OverrideStatus.NONE),
-                        Void.class);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
+//    @Test
+//    void canGetOkResponseForCreatingAValidNewPumpConfigInstance(){
+//        ResponseEntity<Void> responseEntity =
+//                this.restTemplate.postForEntity(
+//                        "http://localhost:"+port+"/control-hub-backend/pump-configuration/new",
+//                        new PumpConfig(20.00, OverrideStatus.NONE),
+//                        Void.class);
+//
+//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+//    }
 
     @Test
     void canGetZalandoProblemResponseForInvalidPumpConfigInstance(){
@@ -50,23 +50,23 @@ class RaspberryPiControllerIntegrationTest {
         assertZalandoProblem(responseEntity.getBody(), HttpStatus.BAD_REQUEST, "The specified turn off temperature cannot be more than 50 degrees celsius");
     }
 
-    @Test
-    void canGetOkResponseAndExpectedPumpConfigBodyWhenHittingPumpConfigurationGetEndpoint(){
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            objectMapper.writeValue(ResourceUtils.getFile("classpath:pump/pump_config.json"), new PumpConfig(25.00, OverrideStatus.PUMP_ON));
-        } catch (IOException e) {
-            fail("An IOException was thrown while preparing the test: ", e);
-        }
-
-        ResponseEntity<PumpConfig> responseEntity =
-                this.restTemplate.getForEntity(
-                        "http://localhost:"+port+"/control-hub-backend/pump-configuration",
-                        PumpConfig.class);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertPumpConfigValues(responseEntity.getBody(), 25.00, OverrideStatus.PUMP_ON);
-    }
+//    @Test
+//    void canGetOkResponseAndExpectedPumpConfigBodyWhenHittingPumpConfigurationGetEndpoint(){
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            objectMapper.writeValue(ResourceUtils.getFile("classpath:pump/pump_config.json"), new PumpConfig(25.00, OverrideStatus.PUMP_ON));
+//        } catch (IOException e) {
+//            fail("An IOException was thrown while preparing the test: ", e);
+//        }
+//
+//        ResponseEntity<PumpConfig> responseEntity =
+//                this.restTemplate.getForEntity(
+//                        "http://localhost:"+port+"/control-hub-backend/pump-configuration",
+//                        PumpConfig.class);
+//
+//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+//        assertPumpConfigValues(responseEntity.getBody(), 25.00, OverrideStatus.PUMP_ON);
+//    }
 
     private void assertPumpConfigValues(final PumpConfig pumpConfig, final double expectedTurnOffTemp, final OverrideStatus expectedOverrideStatus) {
         assertThat(pumpConfig).isNotNull();
