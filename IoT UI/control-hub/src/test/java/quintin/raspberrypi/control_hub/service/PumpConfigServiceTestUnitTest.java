@@ -1,5 +1,6 @@
 package quintin.raspberrypi.control_hub.service;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +26,8 @@ class PumpConfigServiceTestUnitTest {
     @Test
     void canGetPumpConfig() {
         try {
-            objectMapper.writeValue(ResourceUtils.getFile("classpath:pump/pump_config.json"), new PumpConfig(20.00, OverrideStatus.NONE));
+            File file = new File("classpath:pump/pump_config.json");
+            objectMapper.writeValue(file, new PumpConfig(20.00, OverrideStatus.NONE));
         } catch (IOException e) {
             fail("An IOException was thrown while preparing the test: ", e);
         }
