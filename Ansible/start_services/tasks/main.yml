@@ -5,7 +5,8 @@
   systemd:
     state: started
     name: control-hub-backend
-# - name: Start tomcat server to host the control-hub frontend.
-#   systemd:
-#     state: started
-#     name: tomcat-start
+
+ - name: Start tomcat server to host the control-hub frontend.
+   systemd:
+     state: started
+     name: tomcat-start

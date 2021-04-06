@@ -4,13 +4,22 @@
   pre_tasks:
     - name: Set control hub deploy base folder location.
       set_fact:
-        control_hub_deploy_location: /usr/local/applications/Control_Hub
+        control_hub_deploy_location: /usr/local/applications/Control Hub Backend
     - name: Set the tomcat home directory. 
       set_fact:
         tomcat_home_directory: /usr/local/applications/apache-tomcat-9.0.44
     - name: Set services location.
       set_fact:
         base_services_location: /etc/systemd/system
+    - name: Set the control hub backend log location.
+      set_fact:
+        control_hub_backend_logs: /usr/local/applications/Control Hub Backend/logs/control-hub-backend.log
+    - name: Set default pump config turn on temperature.
+      set_fact:
+        default_pump_config_turn_on_temp: 30.0
+    - name: Set default pump config override status.
+      set_fact:
+        default_pump_config_override_status: "\"NONE\""
       
   roles:
     - install_deployment_pre_requisites

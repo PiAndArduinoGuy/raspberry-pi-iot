@@ -13,15 +13,41 @@
     src: "/tmp/raspberry-pi-iot/IoT UI/control-hub-ui/raspberry-pi-control-hub-ui/dist/raspberry-pi-control-hub-ui/"
     dest: "{{tomcat_home_directory}}/webapps/control-hub-frontend/"
 
-- name: Create Control Hub Backend directory
+- name: Create Control Hub Backend directory.
   file:
     state: directory
-    path: /usr/local/applications/Control Hub Backend
+    path: "{{control_hub_deploy_location}}"
     mode: "777"
+
+- name: Create Control Hub Backend logs directory.
+  file:
+    state: directory
+    path: "{{control_hub_deploy_location}}/logs"
+    mode: "777"
+
+- name: Create Control Hub Backend log file.
+  file:
+    state: touch
+    path: "{{control_hub_deploy_location}}/logs/control-hub-backend.log"
+    mode: "777"
+
+- name: Create Control Hub Backend pump config directory.
+  file:
+    state: directory
+    path: "{{control_hub_deploy_location}}/pump"
+    mode: "777"
+
+- name: Create control hub backend pump config file with defaults.
+  become: yes
+  template:
+    src: default_pump_config.j2
+    dest: "{{control_hub_deploy_location}}/pump/pump_config.json"
+    owner: root
+    mode: "777" # user, group and other have full permissions on this file
 
 - name: Copying staged control-hub backend jar component to {{control_hub_deploy_location}}.
   become: yes
   copy:
     remote_src: yes
     src: "/tmp/raspberry-pi-iot/IoT UI/control-hub/target/control-hub-backend.jar"
-    dest: "/usr/local/applications/Control Hub Backend/control-hub-backend.jar"
+    dest: "{{control_hub_deploy_location}}/control-hub-backend.jar"
