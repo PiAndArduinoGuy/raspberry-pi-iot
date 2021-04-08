@@ -2,6 +2,7 @@ package quintin.raspberrypi.control_hub.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.http.HttpStatus;
@@ -18,7 +19,9 @@ import java.io.IOException;
 public class PumpConfigService {
 
     private final ObjectMapper objectMapper;
-    private static final String PUMP_CONFIG_FILE_LOCATION = "/usr/local/applications/Control Hub Backend/pump/pump_config.json";
+
+    @Value("pump-config-file-location")
+    private String pumpConfigFileLocation;
 
     @Autowired
     public PumpConfigService(ObjectMapper objectMapper){
@@ -27,7 +30,7 @@ public class PumpConfigService {
 
     public void saveNewConfig(final PumpConfig newPumpConfig) {
         try {
-            objectMapper.writeValue(new File(PUMP_CONFIG_FILE_LOCATION), newPumpConfig);
+            objectMapper.writeValue(new File(pumpConfigFileLocation), newPumpConfig);
         } catch (IOException e) {
             throw new RaspberryPiControlHubException(e.getMessage(), e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -36,7 +39,7 @@ public class PumpConfigService {
     public PumpConfig getPumpConfig() {
         PumpConfig pumpConfig = null;
         try {
-            pumpConfig = objectMapper.readValue(new File(PUMP_CONFIG_FILE_LOCATION), PumpConfig.class);
+            pumpConfig = objectMapper.readValue(new File(pumpConfigFileLocation), PumpConfig.class);
         } catch (IOException e) {
             throw new RaspberryPiControlHubException(e.getMessage(), e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
