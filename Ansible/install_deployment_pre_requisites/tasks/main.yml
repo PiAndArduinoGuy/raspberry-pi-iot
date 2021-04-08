@@ -64,9 +64,8 @@
 - name: Install Apache Tomcat 9 in directory /usr/local/applications
   become: yes
   unarchive:
-    src: https://downloads.apache.org/tomcat/tomcat-9/v9.0.44/bin/apache-tomcat-9.0.44.tar.gz
+    src: apache-tomcat-9.0.44.tar.gz
     dest: /usr/local/applications/
-    remote_src: yes
     mode: "777"
 
 - name: Gather host package installation facts to determine whether docker is installed.
@@ -75,9 +74,10 @@
 
 - name: Download the docker install script.
   become: yes
-  uri:
-    url: https://get.docker.com
+  copy:
+    src: get-docker.sh
     dest: /tmp/
+    mode: "777"
   when: "'docker-ce-cli' not in ansible_facts.packages" # Docs mentions that trying to install docker from the script if it has already been installed may cause issues.
 
 - name: Execute the docker get-docker.sh script just downloaded to install docker.
