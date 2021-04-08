@@ -28,4 +28,5 @@
     - deploy_control_hub
     - create_control_hub_backend_service
     - create_tomcat_start_service
+    - create_docker_start_control_hub_rmq_container_service
     - setup_control_hub_services

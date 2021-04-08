@@ -1,0 +1,8 @@
+[Unit]
+Description=Start the docker container specified.
+
+[Service]
+ExecStart=sudo docker start control-hub-rmq
+
+[Install]
+WantedBy=multi-user.target

@@ -9,13 +9,12 @@
   become: yes
   shell: 'sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-armhf'
 
-
 - name: Check default Java version.
   shell: 'java -version'
   register: java_version_check_output
 
 - debug:
-    msg: "{{java_version_check_output}}"
+    msg: "Default java version is {{java_version_check_output.stdout}}"
 
 - name: Installing maven.
   become: yes
@@ -70,12 +69,8 @@
     remote_src: yes
     mode: "777"
 
-- name: Determine whether docker is installed yet. # Docs mentions that trying to install docker from the script if it has already been installed may cause issues.
-  shell: 'docker -v'
-  register: docker_version
-
 - name: Gather host package installation facts to determine whether docker is installed.
-  ansible.builtin.package_facts:
+  package_facts:
     strategy: all
 
 - name: Download the docker install script.
@@ -83,35 +78,24 @@
   uri:
     url: https://get.docker.com
     dest: /tmp/
-  when: "'docker-ce-cli' not in ansible_facts.packages"
+  when: "'docker-ce-cli' not in ansible_facts.packages" # Docs mentions that trying to install docker from the script if it has already been installed may cause issues.
 
 - name: Execute the docker get-docker.sh script just downloaded to install docker.
   become: yes
   shell: sh /tmp/get-docker.sh
   when: "'docker-ce-cli' not in ansible_facts.packages"
 
-
-- name: Save return results of 'docker ps -a -f "name=control-hub-rmq" --format "\{\{.Names\}\}"'
+- name: Save return results of the 'docker ps -a -f "name=control-hub-rmq" --format "\{\{.Names\}\}"' command
   become: yes
   shell: docker ps -a -f "name=control-hub-rmq" --format '{{ '{{' }} .Names {{ '}}' }}'
   register: controlHubRmqContainerExist
 
 - name: Does the control-hub-rmq container exist ?
   debug:
-    msg: "{{ controlHubRmqContainerExist.stdout == 'control-hub-rmq' }}"
+    msg: "{{'control-hub-rmq' in controlHubRmqContainerExist.stdout}}"
 
-- name: Save return results of 'docker ps -a -f "name=control-hub-rmq" -f "status=running" --format "\{\{.Names\}\}"'
-  become: yes
-  shell: docker ps -a -f "name=control-hub-rmq" -f "status=running" --format '{{ '{{' }} .Names {{ '}}' }}'
-  register: controlHubRmqContainerRunning
-
-- name: Is the control-hub-rmq container running ?
-  debug:
-    msg: "{{ controlHubRmqContainerRunning.stdout == 'control-hub-rmq' }}"
-
-- name: Pull RabbitMQ and its Management image, expose ports and run the image.
-  become: yes
-  shell: "docker run -d --hostname local-rabbitmq --name control-hub-rmq -p 15672:15672 -p 5672:5672 rabbitmq:3.8.14-management"
-  when: dockerPsOfControlHubRmq.stdout != 'control-hub-rmq'
+- name: Create the control-hub-rmq container.
+  shell: "docker create --hostname local-rabbitmq --name control-hub-rmq -p 15672:15672 -p 5672:5672 rabbitmq:3.8.14-management"
+  when: "{{'control-hub-rmq' not in controlHubRmqContainerExist.stdout}}"
 
 

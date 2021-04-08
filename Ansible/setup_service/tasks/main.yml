@@ -3,7 +3,7 @@
   systemd:
     name: "{{service_name}}"
     state: started
-- name: "Add the service {{service_name}} to the services to startup at boot."
+- name: "Add the {{service_name}} service to startup at boot."
   become: yes
   systemd:
     name: "{{service_name}}"
