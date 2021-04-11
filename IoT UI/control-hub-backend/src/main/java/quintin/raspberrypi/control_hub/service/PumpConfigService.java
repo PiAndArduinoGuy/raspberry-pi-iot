@@ -20,7 +20,7 @@ public class PumpConfigService {
 
     private final ObjectMapper objectMapper;
 
-    @Value("pump-config-file-location")
+    @Value("${pump-config-file-location}")
     private String pumpConfigFileLocation;
 
     @Autowired
