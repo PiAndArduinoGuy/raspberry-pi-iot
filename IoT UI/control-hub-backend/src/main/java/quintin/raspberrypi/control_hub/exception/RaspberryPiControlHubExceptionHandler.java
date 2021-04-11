@@ -16,7 +16,7 @@ public class RaspberryPiControlHubExceptionHandler {
         problem.setStatus(e.getHttpStatus().value());
         problem.setDetail(e.getMessage());
 
-        return new ResponseEntity<>(problem, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(problem, e.getHttpStatus());
     }
 
     @ExceptionHandler(RuntimeException.class)

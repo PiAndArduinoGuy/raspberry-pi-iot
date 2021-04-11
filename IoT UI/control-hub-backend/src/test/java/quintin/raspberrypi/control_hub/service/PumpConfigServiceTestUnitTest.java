@@ -9,12 +9,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ResourceUtils;
 import quintin.raspberrypi.control_hub.OverrideStatus;
 import quintin.raspberrypi.control_hub.PumpConfig;
+
+import javax.annotation.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -32,7 +35,7 @@ class PumpConfigServiceTestUnitTest {
     @Autowired
     private PumpConfigService pumpConfigService;
 
-    @Value("pump-config-file-location")
+    @Value("${pump-config-file-location}")
     private String pumpConfigFileLocation;
 
     private ObjectMapper objectMapper = new ObjectMapper();

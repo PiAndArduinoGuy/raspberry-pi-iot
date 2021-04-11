@@ -12,6 +12,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.ResourceUtils;
 import quintin.raspberrypi.control_hub.OverrideStatus;
@@ -31,7 +32,7 @@ class RaspberryPiControllerIntegrationTest {
     @LocalServerPort
     private int port;
 
-    @Value("pump-config-file-location")
+    @Value("${pump-config-file-location}")
     private String pumpConfigFileLocation;
 
     @Test
