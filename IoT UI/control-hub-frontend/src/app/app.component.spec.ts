@@ -16,16 +16,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'raspberry-pi-control-hub-ui'`, () => {
+  it(`should have as title 'control-hub-frontend'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('raspberry-pi-control-hub-ui');
+    expect(app.title).toEqual('control-hub-frontend');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.content span').textContent).toContain('raspberry-pi-control-hub-ui app is running!');
+    expect(compiled.querySelector('.content span').textContent).toContain('control-hub-frontend app is running!');
   });
 });
