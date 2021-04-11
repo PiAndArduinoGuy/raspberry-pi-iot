@@ -1,6 +1,6 @@
 galaxy_info:
   author: PiAndArduinoGuy
-  description: Builds the control-hub backend SpringBoot project using maven and builds the control-hub-ui project using node.
+  description: Stops the service if needed, removes it form startup, deletes the service and reloads the daemon.
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value

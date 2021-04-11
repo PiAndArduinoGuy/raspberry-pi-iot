@@ -10,49 +10,11 @@
   shell: 'sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-armhf'
 
 - name: Check default Java version.
-  shell: 'java -version'
+  shell: java -version
   register: java_version_check_output
 
 - debug:
     msg: "Default java version is {{java_version_check_output.stdout}}"
-
-- name: Installing maven.
-  become: yes
-  apt:
-    name: maven
-
-- name: Download and unarchive Arm7 supported version of node.
-  become: yes
-  unarchive:
-    src: https://nodejs.org/dist/v14.16.0/node-v14.16.0-linux-armv7l.tar.xz
-    dest: /tmp/
-    remote_src: yes
-
-- name: Copy all files of un-tared node package to /usr/local.
-  become: yes
-  copy:
-    dest: /usr/local/
-    src: /tmp/node-v14.16.0-linux-armv7l/
-    mode: "777"
-    remote_src: yes
-
-- name: Get npm version
-  shell: 'npm -v'
-  register: npm_version
-
-- debug:
-    msg: "NPM version {{npm_version.stdout}}"
-
-- name: Get node version
-  shell: 'node -v'
-  register: node_version
-
-- debug:
-    msg: "Node version {{node_version.stdout}}"
-
-- name: Install angular cli globally using npm.
-  become: yes
-  shell: "npm install -g @angular/cli"
 
 - name: Create directory to hold installed applications.
   become: yes

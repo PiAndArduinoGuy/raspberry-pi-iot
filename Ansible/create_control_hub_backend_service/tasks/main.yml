@@ -1,5 +1,11 @@
 ---
 # tasks file for create_control_hub_service
+- name: Clear previous control-hub-backend service
+  include_role:
+    name: clear_previous_service
+  vars:
+    - service_name: "control-hub-backend"
+
 - name: Create a systemd service of the control-hub backend.
   become: yes
   template:

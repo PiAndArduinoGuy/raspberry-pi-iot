@@ -1,4 +1,0 @@
----
-# defaults file for create_control_hub_service
-control_hub_backend_jar: control-hub-backend.jar
-

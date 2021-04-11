@@ -2,7 +2,10 @@
 Description=Start the docker container specified.
 
 [Service]
+Type=oneshot
 ExecStart=sudo docker start control-hub-rmq
+ExecStop=sudo docker stop control-hub-rmq
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target

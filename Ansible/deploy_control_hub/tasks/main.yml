@@ -1,17 +1,23 @@
 ---
 # tasks file for deploy_control_hub
-- name: Delete old deploy.
+- name: Delete old control-hub-backend deploy.
   become: yes
   file:
     path: "{{control_hub_deploy_location}}"
     state: absent
 
-- name: Copying staged dist component to /usr/local/applications/apache-tomcat-9.0.44/webapps/control-hub-frontend.
+- name: Delete old control-hub-frontend deploy.
   become: yes
-  copy:
-    remote_src: yes # source is already on the host
-    src: "/tmp/raspberry-pi-iot/IoT UI/control-hub-ui/raspberry-pi-control-hub-ui/dist/raspberry-pi-control-hub-ui/"
-    dest: "{{tomcat_home_directory}}/webapps/control-hub-frontend/"
+  file:
+    path: "{{tomcat_home_directory}}/webapps/control-hub-frontend"
+    state: absent
+
+- name: Copying control-hub-ui dist folder to {{tomcat_home_directory}}/webapps/control-hub-frontend.
+  become: yes
+  unarchive:
+    src: "control-hub-frontend.tar.xz"
+    dest: "{{tomcat_home_directory}}/webapps/"
+    mode: "777"
 
 - name: Create Control Hub Backend directory.
   file:
@@ -45,9 +51,8 @@
     owner: root
     mode: "777" # user, group and other have full permissions on this file
 
-- name: Copying staged control-hub backend jar component to {{control_hub_deploy_location}}.
+- name: Copying control-hub-backend jar component to {{control_hub_deploy_location}}.
   become: yes
   copy:
-    remote_src: yes
-    src: "/tmp/raspberry-pi-iot/IoT UI/control-hub/target/control-hub-backend.jar"
-    dest: "{{control_hub_deploy_location}}/control-hub-backend.jar"
+    src: "{{control_hub_backend_jar}}"
+    dest: "{{control_hub_deploy_location}}"
