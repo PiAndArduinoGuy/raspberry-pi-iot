@@ -41,11 +41,9 @@ class PumpConfigServiceTestUnitTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    @DirtiesContext
     void canGetPumpConfig() {
         try {
             File file = new File(pumpConfigFileLocation);
-//            file.createNewFile();
             objectMapper.writeValue(file, new PumpConfig(20.00, OverrideStatus.NONE));
         } catch (IOException e) {
             fail("An IOException was thrown while preparing the test: ", e);
@@ -59,7 +57,6 @@ class PumpConfigServiceTestUnitTest {
     }
 
     @Test
-    @DirtiesContext
     void canSaveNewPumpConfig() {
         pumpConfigService.saveNewConfig(new PumpConfig(22.00, OverrideStatus.PUMP_ON));
 

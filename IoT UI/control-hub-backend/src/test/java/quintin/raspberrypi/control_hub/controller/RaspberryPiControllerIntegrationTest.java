@@ -36,7 +36,6 @@ class RaspberryPiControllerIntegrationTest {
     private String pumpConfigFileLocation;
 
     @Test
-    @DirtiesContext
     void canGetOkResponseForCreatingAValidNewPumpConfigInstance(){
         ResponseEntity<Void> responseEntity =
                 this.restTemplate.postForEntity(
@@ -48,7 +47,6 @@ class RaspberryPiControllerIntegrationTest {
     }
 
     @Test
-    @DirtiesContext
     void canGetZalandoProblemResponseForInvalidPumpConfigInstance(){
         ResponseEntity<Problem> responseEntity =
                 this.restTemplate.postForEntity(
@@ -61,7 +59,6 @@ class RaspberryPiControllerIntegrationTest {
     }
 
     @Test
-    @DirtiesContext
     void canGetOkResponseAndExpectedPumpConfigBodyWhenHittingPumpConfigurationGetEndpoint(){
         ObjectMapper objectMapper = new ObjectMapper();
         try {
