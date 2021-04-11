@@ -1,9 +1,9 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "$schema": "node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "raspberry-pi-control-hub-ui": {
+    "control-hub-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/raspberry-pi-control-hub-ui",
+            "outputPath": "dist/control-hub-frontend",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -67,18 +67,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "raspberry-pi-control-hub-ui:build"
+            "browserTarget": "control-hub-frontend:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "raspberry-pi-control-hub-ui:build:production"
+              "browserTarget": "control-hub-frontend:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "raspberry-pi-control-hub-ui:build"
+            "browserTarget": "control-hub-frontend:build"
           }
         },
         "test": {
@@ -115,15 +115,15 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "raspberry-pi-control-hub-ui:serve"
+            "devServerTarget": "control-hub-frontend:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "raspberry-pi-control-hub-ui:serve:production"
+              "devServerTarget": "control-hub-frontend:serve:production"
             }
           }
         }
       }
     }},
-  "defaultProject": "raspberry-pi-control-hub-ui"
+  "defaultProject": "control-hub-frontend"
 }

@@ -10,4 +10,4 @@ spring:
       bindings:
         output:
           destination: pumpconfigupdate
-pump-config-file-location: /usr/local/applications/Control Hub Backend/pump/pump_config.json
+pump-config-file-location: "/usr/local/applications/Control Hub Backend/pump/pump_config.json"

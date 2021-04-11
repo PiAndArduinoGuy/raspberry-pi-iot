@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'raspberry-pi-control-hub-ui';
+  title = 'control-hub-frontend';
 }
