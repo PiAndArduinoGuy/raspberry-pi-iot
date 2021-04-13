@@ -1,7 +1,0 @@
----
-# tasks file for install_control_hub
-- name: Running install on control-hub backend component.
-  shell: "mvn clean install" # excute the clean and install maven lifecycles
-  register: mvn_clean_install_result
-- name: mvn clean insall result
-  debug: mvn_clean_install_result
