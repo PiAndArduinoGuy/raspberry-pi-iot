@@ -9,13 +9,6 @@
   become: yes
   shell: 'sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-armhf'
 
-- name: Check default Java version.
-  shell: java -version
-  register: java_version_check_output
-
-- debug:
-    msg: "Default java version is {{java_version_check_output.stdout}}"
-
 - name: Create directory to hold installed applications.
   become: yes
   file:
