@@ -1,0 +1,13 @@
+server:
+  port: 8081
+  servlet:
+    context-path: "/control-hub-backend"
+spring:
+  rabbitmq:
+    port: 5672
+  cloud:
+    stream:
+      bindings:
+        output:
+          destination: pumpconfigupdate
+pump-config-file-location: /usr/local/applications/Control Hub Backend/pump/pump_config.json
