@@ -19,6 +19,10 @@
     dest: "{{tomcat_home_directory}}/webapps/"
     mode: "777"
 
+- name: Update index html file with client specific IP address.
+  include_role:
+    name: define_correct_index_html_file
+
 - name: Create Control Hub Backend directory.
   file:
     state: directory

@@ -1,0 +1,11 @@
+---
+- name: "Delete stock index.html file located in {{tomcat_home_directory}}/webapps/control-hub-frontend"
+  file:
+    state: absent
+    path: "{{tomcat_home_directory}}/webapps/control-hub-frontend/index.html"
+
+- name: "baseUrl to access backend will be set to http://{{ansible_host}}:8081/control-hub-backend in the index.html file."
+  template:
+    src: index.html.j2
+    dest: "{{tomcat_home_directory}}/webapps/control-hub-frontend/index.html"
+    mode: "777"
