@@ -1,0 +1,10 @@
+[Unit]
+Description= Starts the control hub backend springboot project.
+
+[Service]
+ExecStart= java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=18081 -jar "/usr/local/applications/Control Hub Backend/{{control_hub_backend_jar}}"
+StandardOutput=append:{{control_hub_backend_logs}}
+StandardError=append:{{control_hub_backend_logs}}
+
+[Install]
+WantedBy=multi-user.target

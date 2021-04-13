@@ -1,0 +1,56 @@
+---
+## tasks file for install_deployment_pre_requisites
+- name: Install Java 8.
+  become: yes
+  apt:
+    name: openjdk-8-jdk
+
+- name: Set default Java version to Java 8.
+  become: yes
+  shell: 'sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-armhf'
+
+- name: Create directory to hold installed applications.
+  become: yes
+  file:
+    path: /usr/local/applications
+    state: directory
+    mode: "777"
+
+- name: Install Apache Tomcat 9 in directory /usr/local/applications
+  become: yes
+  unarchive:
+    src: apache-tomcat-9.0.44.tar.gz
+    dest: /usr/local/applications/
+    mode: "777"
+
+- name: Gather host package installation facts to determine whether docker is installed.
+  package_facts:
+    strategy: all
+
+- name: Download the docker install script.
+  become: yes
+  copy:
+    src: get-docker.sh
+    dest: /tmp/
+    mode: "777"
+  when: "'docker-ce-cli' not in ansible_facts.packages" # Docs mentions that trying to install docker from the script if it has already been installed may cause issues.
+
+- name: Execute the docker get-docker.sh script just downloaded to install docker.
+  become: yes
+  shell: sh /tmp/get-docker.sh
+  when: "'docker-ce-cli' not in ansible_facts.packages"
+
+- name: Save return results of the 'docker ps -a -f "name=control-hub-rmq" --format "\{\{.Names\}\}"' command
+  become: yes
+  shell: docker ps -a -f "name=control-hub-rmq" --format '{{ '{{' }} .Names {{ '}}' }}'
+  register: controlHubRmqContainerExist
+
+- name: Does the control-hub-rmq container exist ?
+  debug:
+    msg: "{{'control-hub-rmq' in controlHubRmqContainerExist.stdout}}"
+
+- name: Create the control-hub-rmq container.
+  shell: "docker create --hostname local-rabbitmq --name control-hub-rmq -p 15672:15672 -p 5672:5672 rabbitmq:3.8.14-management"
+  when: "{{'control-hub-rmq' not in controlHubRmqContainerExist.stdout}}"
+
+

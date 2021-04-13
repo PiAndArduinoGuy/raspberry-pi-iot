@@ -1,0 +1,10 @@
+---
+# tasks file for update_and_upgrade_host
+- name: Update the apt caches.
+  become: yes
+  apt:
+    update_cache: yes
+- name: Upgrade the host.
+  become: yes
+  apt:
+    upgrade: yes

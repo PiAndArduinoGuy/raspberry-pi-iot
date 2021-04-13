@@ -1,0 +1,62 @@
+---
+# tasks file for deploy_control_hub
+- name: Delete old control-hub-backend deploy.
+  become: yes
+  file:
+    path: "{{control_hub_deploy_location}}"
+    state: absent
+
+- name: Delete old control-hub-frontend deploy.
+  become: yes
+  file:
+    path: "{{tomcat_home_directory}}/webapps/control-hub-frontend"
+    state: absent
+
+- name: Copying control-hub-ui dist folder to {{tomcat_home_directory}}/webapps/control-hub-frontend.
+  become: yes
+  unarchive:
+    src: "control-hub-frontend.tar.xz"
+    dest: "{{tomcat_home_directory}}/webapps/"
+    mode: "777"
+
+- name: Update index html file with client specific IP address.
+  include_role:
+    name: define_correct_index_html_file
+
+- name: Create Control Hub Backend directory.
+  file:
+    state: directory
+    path: "{{control_hub_deploy_location}}"
+    mode: "777"
+
+- name: Create Control Hub Backend logs directory.
+  file:
+    state: directory
+    path: "{{control_hub_deploy_location}}/logs"
+    mode: "777"
+
+- name: Create Control Hub Backend log file.
+  file:
+    state: touch
+    path: "{{control_hub_deploy_location}}/logs/control-hub-backend.log"
+    mode: "777"
+
+- name: Create Control Hub Backend pump config directory.
+  file:
+    state: directory
+    path: "{{control_hub_deploy_location}}/pump"
+    mode: "777"
+
+- name: Create control hub backend pump config file with defaults.
+  become: yes
+  template:
+    src: default_pump_config.j2
+    dest: "{{control_hub_deploy_location}}/pump/pump_config.json"
+    owner: root
+    mode: "777" # user, group and other have full permissions on this file
+
+- name: Copying control-hub-backend jar component to {{control_hub_deploy_location}}.
+  become: yes
+  copy:
+    src: "{{control_hub_backend_jar}}"
+    dest: "{{control_hub_deploy_location}}"

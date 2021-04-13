@@ -1,0 +1,10 @@
+[Unit]
+Description=Start Tomcat instance to host control-hub frontend.
+
+[Service]
+Type=forking
+ExecStart={{tomcat_home_directory}}/bin/startup.sh
+ExecStop={{tomcat_home_directory}}/bin/shutdown.sh
+
+[Install]
+WantedBy=multi-user.target
