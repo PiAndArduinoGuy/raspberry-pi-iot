@@ -1,9 +1,8 @@
 package quintin.raspberrypi.control_hub.service;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
@@ -11,11 +10,17 @@ import quintin.raspberrypi.control_hub.PumpConfig;
 import quintin.raspberrypi.control_hub.exception.RaspberryPiControlHubException;
 import quintin.raspberrypi.control_hub.publisher.UpdatedPumpConfigPublisher;
 
+import java.io.File;
+import java.io.IOException;
+
 @Service
 public class PumpConfigService {
 
     private final ObjectMapper objectMapper;
-    private static final String PUMP_CONFIG_FILE_LOCATION = "classpath:pump/pump_config.json";
+
+    @Value("${pump-config-file-location}")
+    private String pumpConfigFileLocation;
+
     @Autowired
     private UpdatedPumpConfigPublisher updatedPumpConfigPublisher;
 
@@ -26,7 +31,7 @@ public class PumpConfigService {
 
     public void saveNewConfig(final PumpConfig newPumpConfig) {
         try {
-            objectMapper.writeValue(ResourceUtils.getFile(PUMP_CONFIG_FILE_LOCATION), newPumpConfig);
+            objectMapper.writeValue(new File(pumpConfigFileLocation), newPumpConfig);
         } catch (IOException e) {
             throw new RaspberryPiControlHubException(e.getMessage(), e, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -35,7 +40,7 @@ public class PumpConfigService {
     public PumpConfig getPumpConfig() {
         PumpConfig pumpConfig = null;
         try {
-            pumpConfig = objectMapper.readValue(ResourceUtils.getFile(PUMP_CONFIG_FILE_LOCATION), PumpConfig.class);
+            pumpConfig = objectMapper.readValue(new File(pumpConfigFileLocation), PumpConfig.class);
         } catch (IOException e) {
             throw new RaspberryPiControlHubException(e.getMessage(), e, HttpStatus.INTERNAL_SERVER_ERROR);
         }

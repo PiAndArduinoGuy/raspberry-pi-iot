@@ -5,6 +5,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.ResourceUtils;
 import quintin.raspberrypi.control_hub.OverrideStatus;
 import quintin.raspberrypi.control_hub.PumpConfig;
@@ -21,12 +23,14 @@ import quintin.raspberrypi.control_hub.domain.PumpState;
 import quintin.raspberrypi.control_hub.exception.Problem;
 import quintin.raspberrypi.control_hub.util.TestUtil;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestPropertySource("classpath:application-test.properties")
 class PumpControllerControllerIntegrationTest {
 
     @LocalServerPort
@@ -37,6 +41,9 @@ class PumpControllerControllerIntegrationTest {
 
     @Autowired
     private ControlHubChannels binding;
+
+    @Value("${pump-config-file-location}")
+    private String pumpConfigFileLocation;
 
 
     @Test
@@ -66,7 +73,7 @@ class PumpControllerControllerIntegrationTest {
     void canGetOkResponseAndExpectedPumpConfigBodyWhenHittingPumpConfigurationGetEndpoint(){
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            objectMapper.writeValue(ResourceUtils.getFile("classpath:pump/pump_config.json"), new PumpConfig(25.00, OverrideStatus.PUMP_ON));
+            objectMapper.writeValue(new File(pumpConfigFileLocation), new PumpConfig(25.00, OverrideStatus.PUMP_ON));
         } catch (IOException e) {
             fail("An IOException was thrown while preparing the test: ", e);
         }

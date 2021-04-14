@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.ResourceUtils;
 import quintin.raspberrypi.control_hub.OverrideStatus;
 import quintin.raspberrypi.control_hub.PumpConfig;
@@ -13,13 +15,18 @@ import quintin.raspberrypi.control_hub.observable.LatestAmbientTempReadingObserv
 import quintin.raspberrypi.control_hub.observable.LatestFifteenAmbientTempReadingsObservable;
 import quintin.raspberrypi.control_hub.observer.LatestTemperaturesObserver;
 
+
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Fail.fail;
 
 @SpringBootTest
+@TestPropertySource("classpath:application-test.properties")
 class PumpConfigServiceUnitTest {
     @Autowired
     private PumpControllerService pumpControllerService;
@@ -39,10 +46,13 @@ class PumpConfigServiceUnitTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Value("${pump-config-file-location}")
+    private String pumpConfigFileLocation;
+
     @Test
     void canGetPumpConfig() {
         try {
-            objectMapper.writeValue(ResourceUtils.getFile("classpath:pump/pump_config.json"), new PumpConfig(20.00, OverrideStatus.NONE));
+            objectMapper.writeValue(new File(pumpConfigFileLocation), new PumpConfig(20.00, OverrideStatus.NONE));
         } catch (IOException e) {
             fail("An IOException was thrown while preparing the test: ", e);
         }
