@@ -1,0 +1,20 @@
+---
+# tasks file for create_docker_start_service
+- name: Clear previous docker-start-control-hub-rmq-container service
+  include_role:
+    name: clear_previous_service
+  vars:
+    - service_name: "docker-start-control-hub-rmq-container"
+
+- name: Copy the control-hub-rmq service file to the {{base_services_location}} directory
+  become: yes
+  copy:
+    src: docker-start-control-hub-rmq-container.service
+    dest: "{{base_services_location}}/docker-start-control-hub-rmq-container.service"
+    mode: "777"
+
+- name: Reload the systemd daemon, ensuring changes to to unit files take proper effect.
+  become: yes
+  systemd:
+    daemon_reload: yes
+

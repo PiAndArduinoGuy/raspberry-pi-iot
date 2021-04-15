@@ -1,0 +1,20 @@
+---
+# tasks file for create_tomcat_start_service
+- name: Clear previous tomcat_start service
+  include_role:
+    name: clear_previous_service
+  vars:
+    - service_name: "tomcat_start"
+
+- name: Create a systemd service to start the tomcat server hosting the control-hub-frontend.
+  become: yes
+  template:
+    src: service.j2
+    dest: "{{base_services_location}}/tomcat_start.service"
+    owner: root
+    mode: "777" # user, group and other have full permissions on this file
+
+- name: Reload the systemd daemon, ensuring changes to to unit files take proper effect.
+  become: yes
+  systemd:
+    daemon_reload: yes
