@@ -13,3 +13,8 @@
     dest: "{{base_services_location}}/tomcat_start.service"
     owner: root
     mode: "777" # user, group and other have full permissions on this file
+
+- name: Reload the systemd daemon, ensuring changes to to unit files take proper effect.
+  become: yes
+  systemd:
+    daemon_reload: yes

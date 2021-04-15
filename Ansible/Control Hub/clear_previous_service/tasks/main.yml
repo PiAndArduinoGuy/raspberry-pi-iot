@@ -1,24 +1,26 @@
 ---
 # tasks file for clear_previous_service
+- name: "Get stats of {{service_name}}.service file"
+  stat:
+    path: "{{base_services_location}}/{{service_name}}.service"
+  register:
+    serviceFileStat
+
 - name: Stop the {{service_name}} if it is running.
   become: yes
   systemd:
     name: "{{service_name}}"
     state: stopped
+  when: "{{serviceFileStat}}.stat.exists == true"
 
 - name: Remove the {{service_name}} from sevices to start at boot if it is enabled.
   become: yes
   systemd:
     name: "{{service_name}}"
     enabled: no
+  when: "{{serviceFileStat}}.stat.exists == true"
 
-- name: Remove previously created {{service_name}} service.
-  become: yes
-  file:
-    path: "{{base_services_location}}/{{service_name}}.service"
-    state: absent
-
-- name: Reload the systemd daemon, ensuring changes to {{service_name}} takes proper effect.
+- name: Reload the systemd daemon, ensuring changes to to unit files take proper effect.
   become: yes
   systemd:
     daemon_reload: yes
