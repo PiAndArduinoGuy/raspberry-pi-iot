@@ -1,5 +1,5 @@
 {
-  "name": "raspberry-pi-control-hub-ui",
+  "name": "control-hub-frontend",
   "version": "0.0.1",
   "scripts": {
     "ng": "ng",
