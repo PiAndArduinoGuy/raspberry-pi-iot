@@ -20,7 +20,8 @@
     enabled: no
   when: "{{serviceFileStat}}.stat.exists == true"
 
-- name: Reload the systemd daemon, ensuring changes to to unit files take proper effect.
+- name: Remove previously created {{service_name}} service.
   become: yes
-  systemd:
-    daemon_reload: yes
+  file:
+    path: "{{base_services_location}}/{{service_name}}.service"
+    state: absent
