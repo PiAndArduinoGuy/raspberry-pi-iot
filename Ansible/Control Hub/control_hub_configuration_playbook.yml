@@ -16,7 +16,7 @@
         control_hub_backend_logs: /usr/local/applications/Control Hub Backend/logs/control-hub-backend.log
     - name: Set the version of the control hub backend jar to deploy.
       set_fact:
-        control_hub_backend_jar: control-hub-backend-20210302.jar
+        control_hub_backend_jar: control-hub-backend-DEV-SNAPSHOT.jar
     - name: Set control hub frontend versioned name.
       set_fact:
         control_hub_frontend_versioned_name: control-hub-frontend-20210302

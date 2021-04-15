@@ -6,7 +6,7 @@
 
     <groupId>quintin.raspberry</groupId>
     <artifactId>pump-controller</artifactId>
-    <version>20210302</version>
+    <version>DEV-SNAPSHOT</version>
 
     <parent>
         <artifactId>spring-boot-starter-parent</artifactId>
