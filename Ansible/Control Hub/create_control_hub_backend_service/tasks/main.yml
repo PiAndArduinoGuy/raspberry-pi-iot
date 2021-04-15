@@ -13,3 +13,8 @@
     dest: "{{base_services_location}}/control-hub-backend.service"
     owner: root
     mode: "777"
+
+- name: Reload the systemd daemon, ensuring changes to {{service_name}} takes proper effect.
+  become: yes
+  systemd:
+    daemon_reload: yes
