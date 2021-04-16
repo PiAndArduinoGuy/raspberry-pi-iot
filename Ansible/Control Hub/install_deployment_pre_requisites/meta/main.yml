@@ -47,4 +47,4 @@ galaxy_info:
     #       Maximum 20 tags per role.
 
 dependencies: 
-  - update_and_upgrade_host
+  - "../Common/update_and_upgrade_host"

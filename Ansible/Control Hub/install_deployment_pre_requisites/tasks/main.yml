@@ -1,13 +1,8 @@
 ---
 ## tasks file for install_deployment_pre_requisites
-- name: Install Java 8.
-  become: yes
-  apt:
-    name: openjdk-8-jdk
-
-- name: Set default Java version to Java 8.
-  become: yes
-  shell: 'sudo update-java-alternatives --set /usr/lib/jvm/java-1.8.0-openjdk-armhf'
+- name: Install Java 8 and set it to be the default Java version.
+  include_role:
+    name: "../Common/install_java_8"
 
 - name: Create directory to hold installed applications.
   become: yes
