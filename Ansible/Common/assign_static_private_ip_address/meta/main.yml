@@ -1,0 +1,5 @@
+galaxy_info:
+  author: PiAndArduinoGuy
+  description: Uses the dhcpd service to assign a static IP address.
+  license: license (GPL-2.0-or-later, MIT, etc)
+  min_ansible_version: 2.9

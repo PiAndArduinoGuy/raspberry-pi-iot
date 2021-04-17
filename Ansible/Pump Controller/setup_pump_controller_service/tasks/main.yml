@@ -1,0 +1,5 @@
+- name: "Set up pump-controller service."
+  include_role:
+    name: "../Common/setup_service"
+  vars:
+    - service_name: "pump-controller"

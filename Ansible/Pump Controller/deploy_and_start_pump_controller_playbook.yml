@@ -1,0 +1,18 @@
+---
+- name: Deploys the pump controller jar application, creates a systemd service and executes the jar.
+  hosts: pump_controller
+  pre_tasks:
+    - name: Set Pump Controller deploy base folder location.
+      set_fact:
+        pump_controller_deploy_location: /usr/local/applications/Pump Controller
+    - name: Define the pump controller jar name to be deployed.
+      set_fact:
+        pump_controller_jar_name: pump-controller-DEV-SNAPSHOT.jar
+    - name: Define the services location.
+      set_fact:
+        base_services_location: /etc/systemd/system
+  roles:
+    - install_deployment_pre_requisites
+    - deploy_pump_controller
+    - create_pump_controller_service
+    - setup_pump_controller_service

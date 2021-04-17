@@ -1,0 +1,37 @@
+- name: Create backup of previously defined dhcpcd.conf file.
+  become: yes
+  copy:
+    remote: yes
+    src: /etc/dhcpcd.conf
+    dest: "/etc/dhcpcd_{{ansible_date_time.time}}.conf"
+
+- name: Delete previously defined dhcpcd.conf file.
+  become: yes
+  file:
+    path: /etc/dhcpcd.conf
+    state: absent
+
+- name: Define the dhcpcd.conf file setting up the static IP address for the eth0 interface.
+  template:
+    src: dhcpcd_eth_interface.conf.j2
+    dest: /etc/dhcpcd.conf
+    mode: "777"
+  when: "{{interface}} == 'ethernet'"
+
+
+- name: Define the dhcpcd.conf file setting up the static IP address for the eth0 interface.
+  template:
+    src: dhcpcd_wl_interface.conf.j2
+    dest: /etc/dhcpcd.conf
+    mode: "777"
+  when: "{{interface}} == 'wireless'"
+
+- name: Create symlinks of the dhcpcd service to execute systemctl commands freely as well as add the service to start at boot time.
+  systemd:
+    name: dhcpcd
+    enabled: yes
+
+- name: Start the dhcpcd service if it is not started already.
+  systemd:
+    name: dhcpcd
+    enabled: yes

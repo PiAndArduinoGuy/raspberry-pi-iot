@@ -1,0 +1,10 @@
+- name: "Create symlinks of the {{service_name}} service to execute systemctl commands freely as well as add the service to start at boot time."
+  become: yes
+  systemd:
+    name: "{{service_name}}"
+    enabled: yes
+- name: "Start the {{service_name}} service."
+  become: yes
+  systemd:
+    name: "{{service_name}}"
+    state: started
