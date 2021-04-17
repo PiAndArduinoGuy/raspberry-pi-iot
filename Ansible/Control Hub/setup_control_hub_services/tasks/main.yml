@@ -2,7 +2,7 @@
 
 - name: "Set up control-hub-backend, docker-start-control-hub-rmq-container and tomcat_start services services."
   include_role:
-    name: setup_service
+    name: "../Common/setup_service"
   vars:
     - service_name: "{{item}}"
   with_items: ["control-hub-backend", "tomcat_start", "docker-start-control-hub-rmq-container"]

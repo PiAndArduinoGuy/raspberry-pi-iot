@@ -2,7 +2,7 @@
 # tasks file for create_docker_start_service
 - name: Clear previous docker-start-control-hub-rmq-container service
   include_role:
-    name: clear_previous_service
+    name: "../Common/clear_previous_service"
   vars:
     - service_name: "docker-start-control-hub-rmq-container"
 

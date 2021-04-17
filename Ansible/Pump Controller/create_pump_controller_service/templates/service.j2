@@ -1,0 +1,10 @@
+[Unit]
+Description= Starts the Pump Controller jar.
+
+[Service]
+ExecStart= java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=18081 -jar "{{pump_controller_deploy_location}}/{{pump_controller_jar_name}}"
+StandardOutput=append:{{pump_controller_deploy_location}}/logs/pump-controller.log
+StandardError=append:{{pump_controller_deploy_location}}/logs/pump-controller.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+galaxy_info:
+  author: PiAndArduinoGuy
+  description: Updates the apt caches and upgrades the host before installing Java 8.
+dependencies:
+  - "../Common/update_and_upgrade_host"

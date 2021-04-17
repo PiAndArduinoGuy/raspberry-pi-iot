@@ -2,7 +2,7 @@
 # tasks file for create_tomcat_start_service
 - name: Clear previous tomcat_start service
   include_role:
-    name: clear_previous_service
+    name: "../Common/clear_previous_service"
   vars:
     - service_name: "tomcat_start"
 

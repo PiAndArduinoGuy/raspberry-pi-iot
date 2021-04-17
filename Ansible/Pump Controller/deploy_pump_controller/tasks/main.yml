@@ -1,0 +1,26 @@
+- name: Delete old Pump Controller deploy.
+  become: yes
+  file:
+    state: absent
+    path: "{{pump_controller_deploy_location}}"
+    mode: "777"
+
+- name: Create Pump Controller directory.
+  become: yes
+  file:
+    state: directory
+    path: "{{pump_controller_deploy_location}}"
+    mode: "777"
+
+- name: Create Pump Controller logs directory.
+  file:
+    state: directory
+    path: "{{pump_controller_deploy_location}}/logs"
+    mode: "777"
+
+- name: Copying Pump Controller jar to {{pump_controller_deploy_location}}.
+  become: yes
+  copy:
+    src: "{{pump_controller_jar_name}}"
+    dest: "{{pump_controller_deploy_location}}"
+    mode: "777"
