@@ -45,6 +45,7 @@
     msg: "{{'control-hub-rmq' in controlHubRmqContainerExist.stdout}}"
 
 - name: Create the control-hub-rmq container.
+  become: yes
   shell: "docker create --hostname local-rabbitmq --name control-hub-rmq -p 15672:15672 -p 5672:5672 rabbitmq:3.8.14-management"
   when: "{{'control-hub-rmq' not in controlHubRmqContainerExist.stdout}}"
 
