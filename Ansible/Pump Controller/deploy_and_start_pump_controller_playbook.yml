@@ -11,8 +11,13 @@
     - name: Define the services location.
       set_fact:
         base_services_location: /etc/systemd/system
+    - name: Set network inteface type.
+      set_fact:
+        interface: wireless # can be either ethernet or wireless, choose ethernet for RaspberryPi 2 or either ethernet or wireless for RaspberryPi 3+
+
   roles:
     - install_deployment_pre_requisites
     - deploy_pump_controller
     - create_pump_controller_service
     - setup_pump_controller_service
+    - ../Common/assign_static_private_ip_address
