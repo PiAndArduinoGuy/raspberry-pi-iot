@@ -26,6 +26,10 @@
     - name: Set default pump config override status.
       set_fact:
         default_pump_config_override_status: "\"NONE\""
+    - name: Set network inteface type.
+      set_fact:
+        interface: wireless # can be either ethernet or wireless, choose ethernet for RaspberryPi 2 or either ethernet or wireless for RaspberryPi 3+
+
       
   roles:
     - install_deployment_pre_requisites
@@ -34,3 +38,4 @@
     - create_tomcat_start_service
     - create_docker_start_control_hub_rmq_container_service
     - setup_control_hub_services
+    - role: "../Common/assign_static_private_ip_address"

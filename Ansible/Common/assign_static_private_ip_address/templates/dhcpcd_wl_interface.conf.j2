@@ -1,4 +1,4 @@
-interface wlan01
-static ip_address={{desired_ip_address}}/24
-static routers={{router_ip_address}}
-static domain_name_servers={{router_ip_address}}
+interface wlan0
+static ip_address={{ansible_host}}/24
+static routers={{ansible_facts.default_ipv4.gateway}}
+static domain_name_servers={{ansible_facts.default_ipv4.gateway}}
