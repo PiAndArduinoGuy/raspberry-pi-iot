@@ -1,9 +1,18 @@
+- debug:
+    msg: The RaspberryPi IP address will be permanently set to {{ansible_host}}
+
+- name: Get stats of dhcpcd.conf file.
+  stat:
+    path: /etc/dhcpcd.conf
+  register: dhcpcdConfStat
+
 - name: Create backup of previously defined dhcpcd.conf file.
   become: yes
   copy:
-    remote: yes
+    remote_src: yes
     src: /etc/dhcpcd.conf
-    dest: "/etc/dhcpcd_{{ansible_date_time.time}}.conf"
+    dest: "/etc/dhcpcd_{{ansible_date_time.date}}_{{ansible_date_time.time}}.conf"
+  when: dhcpcdConfStat.stat.exists == true
 
 - name: Delete previously defined dhcpcd.conf file.
   become: yes
@@ -12,26 +21,27 @@
     state: absent
 
 - name: Define the dhcpcd.conf file setting up the static IP address for the eth0 interface.
+  become: yes
   template:
     src: dhcpcd_eth_interface.conf.j2
     dest: /etc/dhcpcd.conf
     mode: "777"
-  when: "{{interface}} == 'ethernet'"
+  when: interface == "ethernet"
 
 
-- name: Define the dhcpcd.conf file setting up the static IP address for the eth0 interface.
+- name: Define the dhcpcd.conf file setting up the static IP address for the wlan0 interface.
+  become: yes
   template:
     src: dhcpcd_wl_interface.conf.j2
     dest: /etc/dhcpcd.conf
     mode: "777"
-  when: "{{interface}} == 'wireless'"
+  when: interface == "wireless"
 
 - name: Create symlinks of the dhcpcd service to execute systemctl commands freely as well as add the service to start at boot time.
   systemd:
     name: dhcpcd
     enabled: yes
 
-- name: Start the dhcpcd service if it is not started already.
-  systemd:
-    name: dhcpcd
-    enabled: yes
+- name: Restart the RaspberryPi for the staic IP address to be assigned.
+  become: yes
+  reboot:
