@@ -23,8 +23,7 @@ control-hub:
 
 mcp3002:
   python-script:
-    pi:
-      location: "/home/pi/Desktop/mcp3002_adc_value.py"
+    location: /scripts/mcp3002_adc_value.py
 
 automatic-pump-toggler:
   readings-before-check: 5
