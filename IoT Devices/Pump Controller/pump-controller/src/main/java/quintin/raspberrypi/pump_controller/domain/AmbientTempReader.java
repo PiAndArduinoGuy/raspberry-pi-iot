@@ -4,12 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import quintin.raspberrypi.pump_controller.exception.PumpControllerException;
 import quintin.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
 import quintin.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 import quintin.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,7 +34,7 @@ public class AmbientTempReader implements Runnable {
     private final ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
     private final NewAmbientTempReadingObservable newAmbientTempReadingObservable;
 
-    @Value("${mcp3002.python-script.pi.location}")
+    @Value("${mcp3002.python-script.location}")
     private String mcp3002PythonScriptFileLocation;
 
     @Value("${ambient-temp-reader.scheduler.delay-seconds}")
@@ -77,7 +83,22 @@ public class AmbientTempReader implements Runnable {
     }
 
     private String resolvePythonScriptPath() {
-        File file = new File(this.mcp3002PythonScriptFileLocation);
+        File file = null;
+        try {
+            file = new File(getClass().getResource(mcp3002PythonScriptFileLocation).toURI());
+        } catch (URISyntaxException e) {
+            PumpControllerException pumpControllerException = new PumpControllerException(e.getMessage());
+            log.error(pumpControllerException.getMessage(), pumpControllerException);
+            throw pumpControllerException;
+        } catch (NullPointerException e){
+            PumpControllerException pumpControllerException =
+                    new PumpControllerException(
+                            String.format(
+                                    "A null pointer exception was encountered. Might it be that the path to the resource mcp3002PythonScriptFileLocation does not exist? " +
+                                            "The path specified was '%s'", mcp3002PythonScriptFileLocation));
+            log.error(pumpControllerException.getMessage(), pumpControllerException);
+            throw pumpControllerException;
+        }
         return file.getAbsolutePath();
     }
 
