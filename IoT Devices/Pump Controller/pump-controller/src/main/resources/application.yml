@@ -25,6 +25,9 @@ mcp3002:
   python-script:
     location: /scripts/mcp3002_adc_value.py
 
+temp-reading:
+  error: 2 # error of thermistor measured temperature in degrees celsius
+
 automatic-pump-toggler:
   readings-before-check: 5
 
