@@ -17,9 +17,6 @@
     - name: Set the version of the control hub backend jar to deploy.
       set_fact:
         control_hub_backend_jar: control-hub-backend-DEV-SNAPSHOT.jar
-    - name: Set control hub frontend versioned name.
-      set_fact:
-        control_hub_frontend_versioned_name: control-hub-frontend-20210302
     - name: Set default pump config turn on temperature.
       set_fact:
         default_pump_config_turn_on_temp: 30.0
@@ -38,4 +35,4 @@
     - create_tomcat_start_service
     - create_docker_start_control_hub_rmq_container_service
     - setup_control_hub_services
-    - role: "../Common/assign_static_private_ip_address"
+    - role: ../Common/assign_static_private_ip_address
