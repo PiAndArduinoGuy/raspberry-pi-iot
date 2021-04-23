@@ -14,6 +14,9 @@
     - name: Set network inteface type.
       set_fact:
         interface: wireless # can be either ethernet or wireless, choose ethernet for RaspberryPi 2 or either ethernet or wireless for RaspberryPi 3+
+    - name: Set the IP address of the control-hub.
+      set_fact:
+        control_hub_host_ip_address: 192.168.3.118
 
   roles:
     - install_deployment_pre_requisites
