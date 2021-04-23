@@ -43,6 +43,9 @@ public class AmbientTempReader implements Runnable {
     @Value("${ambient-temp-reader.scheduler.rate-seconds}")
     private Long rate;
 
+    @Value("${temp-reading.error}")
+    private Long tempReadingError;
+
     @Autowired
     public AmbientTempReader(AutomaticPumpToggler automaticPumpToggler, NewAmbientTempReadingObservable newAmbientTempReadingObservable, AmbientTempPublisher ambientTempPublisher) {
         this.newAmbientTempReadingObservable = newAmbientTempReadingObservable;
@@ -109,7 +112,7 @@ public class AmbientTempReader implements Runnable {
         }
     }
 
-    private static double getTempFromThermistorResistance(final double thermistorResistance) {
+    private double getTempFromThermistorResistance(final double thermistorResistance) {
         // perform B-parameter equation to get temp from thermistor resistance
         double oneOverB = (1 / B_COEFFICIENT);
         log.debug(String.format("oneOverB: %s", oneOverB));
@@ -125,7 +128,7 @@ public class AmbientTempReader implements Runnable {
         log.debug(String.format("recipInverseTempKelvin: %s", recipInverseTempKelvin));
         double temp = (recipInverseTempKelvin - 273.15);
         log.info(String.format("Temperature: %s", temp));
-        return temp;
+        return temp + tempReadingError;
     }
 
     private static double getThermistorResistanceFromAdcVoltage(final double conversion_value) {
