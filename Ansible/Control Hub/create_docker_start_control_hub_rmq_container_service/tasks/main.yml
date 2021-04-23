@@ -13,7 +13,7 @@
     dest: "{{base_services_location}}/docker-start-control-hub-rmq-container.service"
     mode: "777"
 
-- name: Reload the systemd daemon, ensuring changes to to unit files take proper effect.
+- name: Reload the systemd daemon, ensuring changes to unit files take proper effect.
   become: yes
   systemd:
     daemon_reload: yes
