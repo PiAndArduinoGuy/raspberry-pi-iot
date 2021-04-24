@@ -19,7 +19,7 @@ spring:
 
 control-hub:
   host: 192.168.0.130
-  port: 8080
+  port: 8081
 
 mcp3002:
   python-script:
