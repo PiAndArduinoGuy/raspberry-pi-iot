@@ -42,9 +42,9 @@ public class PumpControllerInitializer implements CommandLineRunner {
 
 
     private void setInitialPumpConfig() {
-        ResponseEntity<Object> responseEntity = this.controlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class);
+        ResponseEntity<PumpConfig> responseEntity = this.controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", PumpConfig.class);
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            PumpConfig initialPumpConfig = (PumpConfig) responseEntity.getBody();
+            PumpConfig initialPumpConfig = responseEntity.getBody();
             log.info(String.format("Initial pump config obtained - %s", initialPumpConfig));
             this.pumpOverrideStatusObservable.setOverrideStatus(initialPumpConfig.getOverrideStatus());
             this.pumpOverrideStatusObservable.notifyObservers(this.pumpOverrideStatusObservable.getOverrideStatus());

@@ -18,7 +18,7 @@ public class ControlHubRestTemplateConfig {
     @Bean
     public RestTemplate controlHubBaseRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
-        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("http://" + controlHubHost + ":" + controlHubPort + "control-hub-backend"));
+        restTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("http://" + controlHubHost + ":" + controlHubPort + "/control-hub-backend"));
         return restTemplate;
     }
 }
