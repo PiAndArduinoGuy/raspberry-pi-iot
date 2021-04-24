@@ -23,7 +23,7 @@ control-hub:
 
 mcp3002:
   python-script:
-    location: /scripts/mcp3002_adc_value.py
+    location: /usr/local/applications/Pump Controller/mcp3002_adc_value.py
 
 # error of thermistor measured temperature in degrees celsius
 temp-reading:
