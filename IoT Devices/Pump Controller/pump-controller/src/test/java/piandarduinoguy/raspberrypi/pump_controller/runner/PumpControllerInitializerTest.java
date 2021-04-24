@@ -70,7 +70,7 @@ class PumpControllerInitializerTest {
             "Then the initial PumpConfig is broadcast to those needing the PumpConfig")
     void canSetInitialPumpConfig() {
         PumpConfig mockPumpConfig = new PumpConfig(20.00, OverrideStatus.PUMP_OFF);
-        when(controlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class))
+        when(controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", Object.class))
                 .thenReturn(new ResponseEntity(mockPumpConfig, HttpStatus.OK));
 
         pumpControllerInitializer.run();
@@ -86,7 +86,7 @@ class PumpControllerInitializerTest {
             "Then the a PumpControllerException is thrown with a message showing the error response")
     void canThrowPumpControllerException() throws Exception {
         Problem problemResponse = new Problem(HttpStatus.BAD_GATEWAY.getReasonPhrase(), HttpStatus.BAD_GATEWAY.value(), "Exception occurred in ControlHub");
-        when(controlHubBaseRestTemplate.getForEntity("/pump-configuration", Object.class))
+        when(controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", Object.class))
                 .thenReturn(new ResponseEntity(problemResponse, HttpStatus.BAD_GATEWAY));
 
         assertThatThrownBy(() -> {
