@@ -24,3 +24,10 @@
     src: "{{pump_controller_jar_name}}"
     dest: "{{pump_controller_deploy_location}}"
     mode: "777"
+
+- name: Copying mcp3002_adc_value.py file to {{pump_controller_deploy_location}}
+  become: yes
+  copy:
+    src: mcp3002_adc_value.py
+    dest: mcp3002_adc_value.py
+    mode: "777"

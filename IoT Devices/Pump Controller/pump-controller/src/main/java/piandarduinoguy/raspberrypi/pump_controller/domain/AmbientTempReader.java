@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import piandarduinoguy.raspberrypi.pump_controller.exception.PumpControllerException;
 import piandarduinoguy.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
 import piandarduinoguy.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 import piandarduinoguy.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
@@ -15,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -75,7 +73,7 @@ public class AmbientTempReader implements Runnable {
     }
 
     private double getAdcVoltageOfThermistor() throws IOException {
-        ProcessBuilder processBuilder = new ProcessBuilder("python2", resolvePythonScriptPath());
+        ProcessBuilder processBuilder = new ProcessBuilder("python2", mcp3002PythonScriptFileLocation);
         processBuilder.redirectErrorStream(true);
 
         Process process = processBuilder.start();
@@ -83,26 +81,6 @@ public class AmbientTempReader implements Runnable {
         log.debug(String.format("ADC value from python script: %s", results.get(0)));
         return Double.parseDouble(results.get(0));
 
-    }
-
-    private String resolvePythonScriptPath() {
-        File file = null;
-        try {
-            file = new File(getClass().getResource(mcp3002PythonScriptFileLocation).toURI());
-        } catch (URISyntaxException e) {
-            PumpControllerException pumpControllerException = new PumpControllerException(e.getMessage());
-            log.error(pumpControllerException.getMessage(), pumpControllerException);
-            throw pumpControllerException;
-        } catch (NullPointerException e){
-            PumpControllerException pumpControllerException =
-                    new PumpControllerException(
-                            String.format(
-                                    "A null pointer exception was encountered. Might it be that the path to the resource mcp3002PythonScriptFileLocation does not exist? " +
-                                            "The path specified was '%s'", mcp3002PythonScriptFileLocation));
-            log.error(pumpControllerException.getMessage(), pumpControllerException);
-            throw pumpControllerException;
-        }
-        return file.getAbsolutePath();
     }
 
     private static List<String> readProcessOutput(InputStream inputStream) throws IOException {
