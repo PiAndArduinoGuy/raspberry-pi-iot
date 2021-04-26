@@ -26,23 +26,23 @@ public class PumpToggler {
 
     public void turnOffPump() {
         if (pumpState.equals(PumpState.ON)) {
-            log.info("(RaspberryPi) Relay deactivated");
+            log.info("Relay deactivated");
             signalPin.low();
             pumpState = PumpState.OFF;
             this.pumpControllerToggleStatusPublisher.publishUpdate(pumpState);
         } else {
-            log.info("(RaspberryPi) Pump is already off");
+            log.info("Pump is already off");
         }
     }
 
     public void turnOnPump() {
         if (pumpState.equals(PumpState.OFF)) {
-            log.info("(RaspberryPi) Relay activated");
+            log.info("Relay activated");
             signalPin.high();
             pumpState = PumpState.ON;
             this.pumpControllerToggleStatusPublisher.publishUpdate(pumpState);
         } else {
-            log.info("(RaspberryPi) Pump is already on");
+            log.info("Pump is already on");
         }
     }
 

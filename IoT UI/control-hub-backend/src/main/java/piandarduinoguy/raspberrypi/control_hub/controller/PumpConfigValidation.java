@@ -7,12 +7,12 @@ public class PumpConfigValidation {
 
     private PumpConfigValidation(){};
 
-    public static void validateTurnOffTemperature(double turnOffTemperature){
-        if(turnOffTemperature < 0){
+    public static void validateTurnOnTemperature(double turnOnTemperature){
+        if(turnOnTemperature < 0){
             throw new RaspberryPiControlHubException("The specified turn off temperature cannot be negative",
                     HttpStatus.BAD_REQUEST);
         }
-        if (turnOffTemperature > 50){
+        if (turnOnTemperature > 50){
             throw new RaspberryPiControlHubException("The specified turn off temperature cannot be more than 50 degrees celsius",
                     HttpStatus.BAD_REQUEST);
         }

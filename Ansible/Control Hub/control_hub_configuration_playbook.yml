@@ -25,7 +25,7 @@
         default_pump_config_override_status: "\"NONE\""
     - name: Set network inteface type.
       set_fact:
-        interface: wireless # can be either ethernet or wireless, choose ethernet for RaspberryPi 2 or either ethernet or wireless for RaspberryPi 3+
+        interface: ethernet # can be either ethernet or wireless, choose ethernet for RaspberryPi 2 or either ethernet or wireless for RaspberryPi 3+
 
       
   roles:

@@ -9,6 +9,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import piandarduinoguy.raspberrypi.pump_controller.exception.PumpControllerException;
 import piandarduinoguy.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
+import piandarduinoguy.raspberrypi.pump_controller.observer.AmbientTempReader;
 import piandarduinoguy.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
 import piandarduinoguy.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 
@@ -40,7 +41,7 @@ class AmbientTempReaderInvalidPythonScriptLocationUnitTest {
         assertThatThrownBy(() -> {
             ambientTempReader.run();
         }).isInstanceOf(PumpControllerException.class)
-                .hasMessage("A null pointer exception was encountered. Might it be that the path to the resource mcp3002PythonScriptFileLocation does not exist? The path specified was '/path/that/does/not/contain/mcp3002_adc_value.py'");
+                .hasMessage("Problem obtaining the ADC value from python script mcp3002_adv_value.py, the exception message was: For input string: \"python2: can't open file '/path/that/does/not/contain/mcp3002_adc_value.py': [Errno 2] No such file or directory\"");
     }
 
 

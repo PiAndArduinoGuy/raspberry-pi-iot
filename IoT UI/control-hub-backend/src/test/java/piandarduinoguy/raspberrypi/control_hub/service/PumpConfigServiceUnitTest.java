@@ -59,7 +59,7 @@ class PumpConfigServiceUnitTest {
         PumpConfig pumpConfig = pumpConfigService.getPumpConfig();
 
         assertThat(pumpConfig).isNotNull();
-        assertThat(pumpConfig.getTurnOffTemp()).isEqualTo(20.00);
+        assertThat(pumpConfig.getTurnOnTemp()).isEqualTo(20.00);
         assertThat(pumpConfig.getOverrideStatus()).isEqualTo(OverrideStatus.NONE);
     }
 
@@ -68,7 +68,7 @@ class PumpConfigServiceUnitTest {
         pumpConfigService.saveNewConfig(new PumpConfig(22.00, OverrideStatus.PUMP_ON));
 
         PumpConfig pumpConfig = pumpConfigService.getPumpConfig();
-        assertThat(pumpConfig.getTurnOffTemp()).isEqualTo(22.00);
+        assertThat(pumpConfig.getTurnOnTemp()).isEqualTo(22.00);
         assertThat(pumpConfig.getOverrideStatus()).isEqualTo(OverrideStatus.PUMP_ON);
     }
 

@@ -34,7 +34,7 @@ public class PumpControllerControllerImpl implements PumpControllerController{
 
     @Override
     public ResponseEntity<Void> setNewPumpConfig(@RequestBody PumpConfig newPumpConfig){
-        PumpConfigValidation.validateTurnOffTemperature(newPumpConfig.getTurnOffTemp());
+        PumpConfigValidation.validateTurnOnTemperature(newPumpConfig.getTurnOnTemp());
         this.pumpConfigService.notifyPumpControllerOfUpdate(newPumpConfig);
         this.pumpConfigService.saveNewConfig(newPumpConfig);
         return new ResponseEntity(HttpStatus.OK);

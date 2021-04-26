@@ -21,7 +21,7 @@ export class ConfigurationEditComponent implements OnInit {
       (pumpConfig: PumpConfigModel) => {
         console.log(pumpConfig);
         this.form.setValue({
-          turnOffTemp : pumpConfig.turnOffTemp,
+          turnOnTemp : pumpConfig.turnOnTemp,
           overrideStatus : pumpConfig.overrideStatus
         });
     }
@@ -32,7 +32,7 @@ export class ConfigurationEditComponent implements OnInit {
   onSaveNewConfiguration() {
     const newPumpConfig = new PumpConfigModel();
     newPumpConfig.overrideStatus = this.form.value.overrideStatus;
-    newPumpConfig.turnOffTemp = this.form.value.turnOffTemp;
+    newPumpConfig.turnOnTemp = this.form.value.turnOnTemp;
 
     this.backendHttpRequestsService.saveNewPumpConfig(newPumpConfig);
     this.router.navigate(['../'], {relativeTo: this.activatedRoute});

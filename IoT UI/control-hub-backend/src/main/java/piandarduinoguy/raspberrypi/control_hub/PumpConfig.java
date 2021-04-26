@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class PumpConfig {
-    private double turnOffTemp;
+    private double turnOnTemp;
     private OverrideStatus overrideStatus;
 
 }

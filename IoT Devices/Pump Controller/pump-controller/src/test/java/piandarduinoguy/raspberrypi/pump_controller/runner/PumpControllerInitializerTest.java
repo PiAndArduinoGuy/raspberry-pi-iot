@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,9 +22,10 @@ import piandarduinoguy.raspberrypi.pump_controller.observable.PumpOverrideStatus
 import piandarduinoguy.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 import piandarduinoguy.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
 import piandarduinoguy.raspberrypi.pump_controller.data.Problem;
-import piandarduinoguy.raspberrypi.pump_controller.domain.AmbientTempReader;
+import piandarduinoguy.raspberrypi.pump_controller.observer.AmbientTempReader;
 import piandarduinoguy.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 import piandarduinoguy.raspberrypi.pump_controller.observer.ManualPumpToggler;
+import piandarduinoguy.raspberrypi.pump_controller.subscriber.UpdatedPumpConfigSubscriber;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,7 +44,8 @@ import static org.mockito.Mockito.when;
         PumpOverrideStatusObservable.class,
         PumpTurnOnTempObservable.class,
         NewAmbientTempReadingObservable.class,
-        AmbientTempPublisher.class
+        AmbientTempPublisher.class,
+        UpdatedPumpConfigSubscriber.class
 })
 @TestPropertySource("classpath:application-test.properties")
 class PumpControllerInitializerTest {
@@ -92,7 +95,7 @@ class PumpControllerInitializerTest {
         assertThatThrownBy(() -> {
             pumpControllerInitializer.run();
         }).isInstanceOf(PumpControllerException.class)
-                .hasMessage("The updated pump config could not be retrieved from the control hub, the response was: Problem(title=Bad Gateway, status=502, detail=Exception occurred in ControlHub)");
+                .hasMessage("The updated pump config could not be retrieved from the control hub, the response was a Problem - Problem(title=Bad Gateway, status=502, detail=Exception occurred in ControlHub).");
 
     }
 
