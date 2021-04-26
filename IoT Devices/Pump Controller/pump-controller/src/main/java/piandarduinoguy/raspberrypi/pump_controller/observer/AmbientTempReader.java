@@ -123,7 +123,7 @@ public class AmbientTempReader implements Runnable, Observer {
         log.debug(String.format("inverseTempKelvin: %s", inverseTempKelvin));
         double recipInverseTempKelvin = 1 / inverseTempKelvin;
         log.debug(String.format("recipInverseTempKelvin: %s", recipInverseTempKelvin));
-        double tempPlusError = (recipInverseTempKelvin - 273.15);
+        double tempPlusError = (recipInverseTempKelvin - 273.15) + tempReadingError;
         log.info(String.format("Temperature: %s", tempPlusError));
         return tempPlusError;
     }
