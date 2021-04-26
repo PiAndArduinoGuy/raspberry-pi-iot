@@ -1,6 +1,6 @@
 import {OverrideStatusEnum} from './override-status.enum';
 
 export class PumpConfigModel{
-  turnOffTemp: number;
+  turnOnTemp: number;
   overrideStatus: OverrideStatusEnum;
 }

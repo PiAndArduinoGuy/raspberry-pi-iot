@@ -14,6 +14,6 @@ import org.springframework.stereotype.Component;
 @ToString
 @Component
 public class PumpConfig {
-    private double turnOnTemp;
-    private OverrideStatus overrideStatus = OverrideStatus.NOT_SET;
+    private Double turnOnTemp;
+    private OverrideStatus overrideStatus;
 }

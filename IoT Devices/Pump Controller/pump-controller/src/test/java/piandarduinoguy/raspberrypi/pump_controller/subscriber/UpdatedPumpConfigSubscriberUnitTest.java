@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import piandarduinoguy.raspberrypi.pump_controller.channel.PumpControllerChannels;
 import piandarduinoguy.raspberrypi.pump_controller.data.OverrideStatus;
 import piandarduinoguy.raspberrypi.pump_controller.data.PumpConfig;
-import piandarduinoguy.raspberrypi.pump_controller.domain.AmbientTempReader;
+import piandarduinoguy.raspberrypi.pump_controller.observer.AmbientTempReader;
 import piandarduinoguy.raspberrypi.pump_controller.domain.PumpToggler;
 import piandarduinoguy.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
 import piandarduinoguy.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
@@ -73,6 +73,8 @@ class UpdatedPumpConfigSubscriberUnitTest {
     @Test
     void givenPumpConfigurationMessageSent_whenPumpConfigUpdateMessageReceived_thenMessageMustBeSentToOutputPipe() throws Exception {
         // Given
+        PumpConfig initialPumpConfig = new PumpConfig(10.00, OverrideStatus.NONE);
+        updatedPumpConfigSubscriber.setInitialPumpConfig(initialPumpConfig);
         PumpConfig newPumpConfig = new PumpConfig();
         newPumpConfig.setOverrideStatus(OverrideStatus.NONE);
         newPumpConfig.setTurnOnTemp(20.00);
@@ -89,15 +91,20 @@ class UpdatedPumpConfigSubscriberUnitTest {
 
 
     @Test
-    @DisplayName("Given the overrideStatus of the PumpConfig has changed" +
+    @DisplayName("Given the overrideStatus of the PumpConfig has changed and the automaticPumpToggler, manualPumpToggler and ambientTempReader classes are observers" +
             "When the UpdatedPumpConfig class receives the update" +
-            "Then it knows the OverrideStatus has changed and updates the PumpOverrideObservable and notifies the AutomaticPumpToggler and ManualPumpToggler observers of the change")
+            "Then it knows the OverrideStatus has changed and updates the PumpOverrideObservable and notifies the AutomaticPumpToggler, AmbientTempReader and ManualPumpToggler observers of the change")
     void canNotifyOfUpdatedOverrideStatus() {
         // Given
+        PumpConfig oldPumpConfig = new PumpConfig(10.00, OverrideStatus.PUMP_OFF);
+        updatedPumpConfigSubscriber.setInitialPumpConfig(oldPumpConfig);
+        updatedPumpConfigSubscriber.setInitialPumpConfig(oldPumpConfig);
         PumpConfig newPumpConfig = new PumpConfig();
         newPumpConfig.setOverrideStatus(OverrideStatus.NONE);
+        newPumpConfig.setTurnOnTemp(10.00);
         pumpOverrideStatusObservable.addObserver(automaticPumpToggler);
         pumpOverrideStatusObservable.addObserver(manualPumpToggler);
+        pumpOverrideStatusObservable.addObserver(ambientTempReader);
 
         // When
         binding.updatedPumpConfigInput().send(MessageBuilder.withPayload(newPumpConfig).build());
@@ -105,6 +112,7 @@ class UpdatedPumpConfigSubscriberUnitTest {
         // Then
         verify(automaticPumpToggler).update(any(Observable.class), any(OverrideStatus.class));
         verify(manualPumpToggler).update(any(Observable.class), any(OverrideStatus.class));
+        verify(ambientTempReader).update(any(Observable.class), any(OverrideStatus.class));
     }
 
     @Test
@@ -113,6 +121,8 @@ class UpdatedPumpConfigSubscriberUnitTest {
             "Then it knows the turnOnTemperature has changed and updates the TurnOnTemperatureObservable class and notifies the AutomaticPumpToggler observers of the change")
     void canNotifyOfUpdatedTurnOnTemperature() {
         // Given
+        PumpConfig initialPumpConfig = new PumpConfig(10.00, OverrideStatus.NONE);
+        updatedPumpConfigSubscriber.setInitialPumpConfig(initialPumpConfig);
         PumpConfig newPumpConfig = new PumpConfig();
         newPumpConfig.setTurnOnTemp(20.00);
         pumpTurnOnTempObservable.addObserver(automaticPumpToggler);

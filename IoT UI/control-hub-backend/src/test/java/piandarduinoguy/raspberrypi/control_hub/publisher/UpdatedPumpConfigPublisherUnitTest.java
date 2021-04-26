@@ -36,6 +36,6 @@ class UpdatedPumpConfigPublisherUnitTest {
         String pumpConfig = (String) messageCollector.forChannel(binding.newPumpConfigOutput()).poll().getPayload();
         PumpConfig pumpConfigReceivedJson = objectMapper.readValue(pumpConfig, PumpConfig.class);
         assertThat(pumpConfigReceivedJson.getOverrideStatus()).isEqualTo(OverrideStatus.PUMP_OFF);
-        assertThat(pumpConfigReceivedJson.getTurnOffTemp()).isEqualTo(20.00);
+        assertThat(pumpConfigReceivedJson.getTurnOnTemp()).isEqualTo(20.00);
     }
 }

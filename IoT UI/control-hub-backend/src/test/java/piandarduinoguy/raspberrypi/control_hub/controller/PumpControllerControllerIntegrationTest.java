@@ -156,9 +156,9 @@ class PumpControllerControllerIntegrationTest {
     }
 
 
-    private void assertPumpConfigValues(final PumpConfig pumpConfig, final double expectedTurnOffTemp, final OverrideStatus expectedOverrideStatus) {
+    private void assertPumpConfigValues(final PumpConfig pumpConfig, final double expectedTurnOnTemp, final OverrideStatus expectedOverrideStatus) {
         Assertions.assertThat(pumpConfig).isNotNull();
-        Assertions.assertThat(pumpConfig.getTurnOffTemp()).isEqualTo(expectedTurnOffTemp);
+        Assertions.assertThat(pumpConfig.getTurnOnTemp()).isEqualTo(expectedTurnOnTemp);
         Assertions.assertThat(pumpConfig.getOverrideStatus()).isEqualTo(expectedOverrideStatus);
     }
 

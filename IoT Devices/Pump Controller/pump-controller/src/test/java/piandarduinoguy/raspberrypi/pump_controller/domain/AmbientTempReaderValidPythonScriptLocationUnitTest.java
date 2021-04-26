@@ -9,6 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import piandarduinoguy.raspberrypi.pump_controller.exception.PumpControllerException;
+import piandarduinoguy.raspberrypi.pump_controller.observer.AmbientTempReader;
 import piandarduinoguy.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
 import piandarduinoguy.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
 import piandarduinoguy.raspberrypi.pump_controller.observer.AutomaticPumpToggler;

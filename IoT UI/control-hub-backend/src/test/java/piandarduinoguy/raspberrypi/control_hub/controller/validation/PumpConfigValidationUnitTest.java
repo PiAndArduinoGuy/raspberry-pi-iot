@@ -13,9 +13,9 @@ import static org.assertj.core.api.Assertions.fail;
 class PumpConfigValidationUnitTest {
 
     @Test
-    void canThrowRaspberryPiControlHubExceptionForLessThat0TurnOffTemp(){
+    void canThrowRaspberryPiControlHubExceptionForLessThat0TurnOnTemp(){
         try {
-            PumpConfigValidation.validateTurnOffTemperature(-1.00);
+            PumpConfigValidation.validateTurnOnTemperature(-1.00);
             fail("A RaspberryPiControlHubException was expected to be thrown when validating a turn off temperature of -1");
         } catch(RaspberryPiControlHubException ex){
             assertThat(ex.getMessage()).isEqualToIgnoringCase("The specified turn off temperature cannot be negative");
@@ -24,18 +24,18 @@ class PumpConfigValidationUnitTest {
     }
 
     @Test
-    void doesNotThrownAnyExceptionWhenTurnOffTemperatureIsInTheRange0And50(){
+    void doesNotThrownAnyExceptionWhenTurnOnTemperatureIsInTheRange0And50(){
         try {
-            PumpConfigValidation.validateTurnOffTemperature(1.00);
+            PumpConfigValidation.validateTurnOnTemperature(1.00);
         } catch(RaspberryPiControlHubException ex){
             fail("A RaspberryPiControlHubException should not have been thrown for a turn off temperature of 1.00 (in the range 0 and 50)");
         }
     }
 
     @Test
-    void canThrowRaspberryPiControlHubExceptionForMoreThat50TurnOffTemp(){
+    void canThrowRaspberryPiControlHubExceptionForMoreThat50TurnOnTemp(){
         try {
-            PumpConfigValidation.validateTurnOffTemperature(51.00);
+            PumpConfigValidation.validateTurnOnTemperature(51.00);
             fail("A RaspberryPiControlHubException was expected to be thrown when validating a turn off temperature of 51");
         } catch(RaspberryPiControlHubException ex){
             assertThat(ex.getMessage()).isEqualToIgnoringCase("The specified turn off temperature cannot be more than 50 degrees celsius");

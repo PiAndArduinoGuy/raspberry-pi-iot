@@ -1,10 +1,10 @@
 server:
-  port: 8081
+  port: 8082
 
 spring:
   rabbitmq:
     port: 5672
-    host: 192.168.0.130
+    host: localhost
 
   cloud:
     stream:
@@ -18,7 +18,7 @@ spring:
 
 
 control-hub:
-  host: 192.168.0.130
+  host: localhost
   port: 8081
 
 mcp3002:
@@ -35,4 +35,4 @@ automatic-pump-toggler:
 ambient-temp-reader:
   scheduler:
     delay-seconds: 10
-    rate-seconds: 20
+    rate-seconds: 5

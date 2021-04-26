@@ -26,6 +26,10 @@ public class UpdatedPumpConfigSubscriber {
         this.pumpOverrideStatusObservable = pumpOverrideStatusObservable;
     }
 
+    public void setInitialPumpConfig(PumpConfig pumpConfig){
+        this.pumpConfig = pumpConfig;
+    }
+
     @StreamListener(PumpControllerChannels.UPDATED_PUMP_CONFIG_INPUT)
     public void sendPumpUpdateConfigToObservers(PumpConfig newPumpConfig) {
         log.info(String.format("Received - %s", newPumpConfig.toString()));
@@ -35,11 +39,18 @@ public class UpdatedPumpConfigSubscriber {
     private void notifyRelevantObserverOfPumpConfigAttributeChange(PumpConfig updatedPumpConfig) {
         if (hasOverrideStatusChanged(updatedPumpConfig)) {
             log.info("The override status has been updated.");
+            this.pumpConfig.setOverrideStatus(updatedPumpConfig.getOverrideStatus());
             this.pumpOverrideStatusObservable.setOverrideStatus(updatedPumpConfig.getOverrideStatus());
-        } else {
+        }
+        if (hasTurnOnTempChanged(updatedPumpConfig)){
             log.info("The turn on temperature has been updated.");
+            this.pumpConfig.setTurnOnTemp(updatedPumpConfig.getTurnOnTemp());
             this.pumpTurnOnTempObservable.setTurnOnTemp(updatedPumpConfig.getTurnOnTemp());
         }
+    }
+
+    private boolean hasTurnOnTempChanged(PumpConfig updatedPumpConfig) {
+        return !this.pumpConfig.getTurnOnTemp().equals(updatedPumpConfig.getTurnOnTemp());
     }
 
     private boolean hasOverrideStatusChanged(PumpConfig updatedPumpConfig) {

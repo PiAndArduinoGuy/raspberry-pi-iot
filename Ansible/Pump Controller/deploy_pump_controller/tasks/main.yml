@@ -29,5 +29,5 @@
   become: yes
   copy:
     src: mcp3002_adc_value.py
-    dest: mcp3002_adc_value.py
+    dest: "{{pump_controller_deploy_location}}/mcp3002_adc_value.py"
     mode: "777"

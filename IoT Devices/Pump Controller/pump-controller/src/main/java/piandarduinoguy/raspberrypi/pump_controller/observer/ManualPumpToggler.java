@@ -22,12 +22,16 @@ public class ManualPumpToggler implements Observer {
 
     @Override
     public void update(final Observable observable, final Object updatedPumpOverrideStatus) {
-        log.info("Update received");
+        log.info(String.format("Received - %s", updatedPumpOverrideStatus.toString()));
         OverrideStatus overrideStatus = (OverrideStatus) updatedPumpOverrideStatus;
         if (overrideStatus == OverrideStatus.PUMP_ON) {
+            log.info("Manual override has been set.");
             pumpToggler.turnOnPump();
         } else if (overrideStatus == OverrideStatus.PUMP_OFF) {
+            log.info("Manual override has been set.");
             pumpToggler.turnOffPump();
+        } else {
+            log.info("Manual override has not been set.");
         }
     }
 

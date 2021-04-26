@@ -16,7 +16,6 @@ import piandarduinoguy.raspberrypi.pump_controller.domain.PumpToggler;
 import piandarduinoguy.raspberrypi.pump_controller.observable.NewAmbientTempReadingObservable;
 import piandarduinoguy.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
 import piandarduinoguy.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
-import piandarduinoguy.raspberrypi.pump_controller.domain.AmbientTempReader;
 import piandarduinoguy.raspberrypi.pump_controller.runner.PumpControllerInitializer;
 
 import java.util.concurrent.ScheduledExecutorService;
