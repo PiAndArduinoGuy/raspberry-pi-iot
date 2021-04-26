@@ -55,8 +55,9 @@
     owner: root
     mode: "777" # user, group and other have full permissions on this file
 
-- name: Copying control-hub-backend jar component to {{control_hub_deploy_location}}.
+- name: Unarchive control-hub-backend jar component to {{control_hub_deploy_location}}.
   become: yes
-  copy:
+  unarchive:
     src: "{{control_hub_backend_jar}}"
     dest: "{{control_hub_deploy_location}}"
+    mode: "777"
