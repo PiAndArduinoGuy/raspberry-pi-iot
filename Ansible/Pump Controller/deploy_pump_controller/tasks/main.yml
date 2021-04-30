@@ -21,7 +21,7 @@
 - name: Unarchive Pump Controller jar to {{pump_controller_deploy_location}}.
   become: yes
   unarchive:
-    src: "{{pump_controller_jar_name}}"
+    src: "{{pump_controller_zip_name}}"
     dest: "{{pump_controller_deploy_location}}"
     mode: "777"
 

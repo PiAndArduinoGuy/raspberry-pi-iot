@@ -16,7 +16,7 @@
         control_hub_backend_logs: /usr/local/applications/Control Hub Backend/logs/control-hub-backend.log
     - name: Set the version of the control hub backend jar to deploy.
       set_fact:
-        control_hub_backend_jar: control-hub-backend-20210423.tar.xz
+        control_hub_backend_zip_name: control-hub-backend-20210423.tar.xz
     - name: Set default pump config turn on temperature.
       set_fact:
         default_pump_config_turn_on_temp: 30.0

@@ -5,6 +5,13 @@
   vars:
     - service_name: "pump-controller"
 
+- name: Extract jar name from {{pump_controller_zip_name}}
+  set_fact:
+    pump_controller_jar_name: "{{pump_controller_zip_name.split('.')[0]}}"
+
+- debug:
+    msg: "Jar name is {{pump_controller_jar_name}}"
+
 - name: Create a systemd service of the Pump Controller.
   become: yes
   template:

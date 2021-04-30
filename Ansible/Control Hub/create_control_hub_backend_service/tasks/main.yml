@@ -6,6 +6,10 @@
   vars:
     - service_name: "control-hub-backend"
 
+- name: Extract jar name from {{control_hub_backend_zip_name}}
+  set_fact:
+    control_hub_backend_jar_name: "{{control_hub_backend_zip_name.split('.')[0]}}"
+
 - name: Create a systemd service of the control-hub backend.
   become: yes
   template:
