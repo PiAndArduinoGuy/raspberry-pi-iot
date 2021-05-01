@@ -58,6 +58,6 @@
 - name: Unarchive control-hub-backend jar component to {{control_hub_deploy_location}}.
   become: yes
   unarchive:
-    src: "{{control_hub_backend_jar}}"
+    src: "{{control_hub_backend_zip_name}}"
     dest: "{{control_hub_deploy_location}}"
     mode: "777"
