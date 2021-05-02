@@ -72,8 +72,8 @@ class PumpControllerInitializerTest {
             "When the PumpControllerInitializer is run" +
             "Then the initial PumpConfig is broadcast to those needing the PumpConfig")
     void canSetInitialPumpConfig() {
-        PumpConfig mockPumpConfig = new PumpConfig(20.00, OverrideStatus.PUMP_OFF);
-        when(controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", Object.class))
+        String mockPumpConfig = "{\"turnOnTemp\":20.0,\"overrideStatus\":\"NONE\"}";
+        when(controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", String.class))
                 .thenReturn(new ResponseEntity(mockPumpConfig, HttpStatus.OK));
 
         pumpControllerInitializer.run();
@@ -87,15 +87,47 @@ class PumpControllerInitializerTest {
     @DisplayName("Given the PumpConfig cannot be obtained due to some exception from the ControlHub" +
             "When the PumpControllerInitializer is run" +
             "Then the a PumpControllerException is thrown with a message showing the error response")
-    void canThrowPumpControllerException() throws Exception {
-        Problem problemResponse = new Problem(HttpStatus.BAD_GATEWAY.getReasonPhrase(), HttpStatus.BAD_GATEWAY.value(), "Exception occurred in ControlHub");
-        when(controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", Object.class))
+    void canThrowPumpControllerException() {
+        String problemResponse = String.format("{\"title\": \"%s\", \"status\": \"%s\", \"detail\":\"%s\"}", HttpStatus.BAD_GATEWAY.getReasonPhrase(), HttpStatus.BAD_GATEWAY.value(), "Exception occurred in ControlHub");;
+        when(controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", String.class))
                 .thenReturn(new ResponseEntity(problemResponse, HttpStatus.BAD_GATEWAY));
 
         assertThatThrownBy(() -> {
             pumpControllerInitializer.run();
         }).isInstanceOf(PumpControllerException.class)
                 .hasMessage("The updated pump config could not be retrieved from the control hub, the response was a Problem - Problem(title=Bad Gateway, status=502, detail=Exception occurred in ControlHub).");
+
+    }
+
+    @Test
+    @DisplayName("Given the PumpConfig cannot be obtained due to some exception from the ControlHub" +
+            "When the PumpControllerInitializer is run" +
+            "Then the a PumpControllerException is thrown with a message showing the error response")
+    void canThrowPumpControllerExceptionIfJsonProcessingExceptionIsThrownForProblemMapping() {
+        String problemResponse = String.format("{\"TITLE\": \"%s\", \"status\": \"%s\", \"detail\":\"%s\"}", HttpStatus.BAD_GATEWAY.getReasonPhrase(), HttpStatus.BAD_GATEWAY.value(), "Exception occurred in ControlHub");;
+        when(controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", String.class))
+                .thenReturn(new ResponseEntity(problemResponse, HttpStatus.BAD_GATEWAY));
+
+        assertThatThrownBy(() -> {
+            pumpControllerInitializer.run();
+        }).isInstanceOf(PumpControllerException.class)
+                .hasMessage("Error occurred mapping Control Hub problem response.");
+
+    }
+
+    @Test
+    @DisplayName("Given the PumpConfig cannot be obtained due to some exception from the ControlHub" +
+            "When the PumpControllerInitializer is run" +
+            "Then the a PumpControllerException is thrown with a message showing the error response")
+    void canThrowPumpControllerExceptionIfJsonProcessingExceptionIsThrownForPumpConfigMapping() {
+        String mockPumpConfig = "{\"turnOnTemp\":20.0,\"overrideStatus\":\"INVALID\"}";
+        when(controlHubBaseRestTemplate.getForEntity("/pump-controller/pump-configuration", String.class))
+                .thenReturn(new ResponseEntity(mockPumpConfig, HttpStatus.OK));
+
+        assertThatThrownBy(() -> {
+            pumpControllerInitializer.run();
+        }).isInstanceOf(PumpControllerException.class)
+                .hasMessage("Error occurred mapping Control Hub pump config response.");
 
     }
 
