@@ -2,3 +2,11 @@
 - name: Install Java 8 and set it to be the default Java version.
   include_role:
     name: "../Common/install_java_8"
+- name: Install wiringpi, the library that Pi4J relies on.
+  become: yes
+  apt:
+    name: wiringpi
+- name: Install python-gpiozero needed to execute the mcp3002_adc_value.py python script.
+  become: yes
+  apt:
+    name: python-gpiozero
