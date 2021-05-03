@@ -78,34 +78,44 @@ public class AmbientTempReader implements Runnable, Observer {
     private void getAmbientTempAndNotifyObservers() {
         log.info("Attempting to read temperature");
         double adcThermistorVoltage = 0;
-        try {
-            adcThermistorVoltage = getAdcVoltageOfThermistor();
-        } catch (IOException e) {
-            log.error("The script location is either wrong or the script does not exist", e);
-        }
+        adcThermistorVoltage = getAdcVoltageOfThermistor();
         double thermistorResistance = getThermistorResistanceFromAdcVoltage(adcThermistorVoltage);
         this.newAmbientTempReadingObservable.setTemp(getTempFromThermistorResistance(thermistorResistance));
     }
 
-    private double getAdcVoltageOfThermistor() throws IOException {
+    private double getAdcVoltageOfThermistor() {
         ProcessBuilder processBuilder = new ProcessBuilder("python2", mcp3002PythonScriptFileLocation);
         processBuilder.redirectErrorStream(true);
-        Process process = processBuilder.start();
+        Process process;
+        try {
+            process = processBuilder.start();
+        } catch (IOException e) {
+            PumpControllerException pumpControllerException =
+                    new PumpControllerException(String.format("Could not start the python script reading process, an IOException occurred with message: %s.", e.getMessage()), e);
+            log.error("An IOException was encountered", pumpControllerException);
+            throw pumpControllerException;
+        }
         List<String> results = readProcessOutput(process.getInputStream());
-        log.debug(String.format("ADC value from python script: %s", results.get(0)));
-        try{
-            Double.parseDouble(results.get(0));
-            return Double.parseDouble(results.get(0));
-        } catch (NumberFormatException e){
-            throw new PumpControllerException(String.format(
-                    "Problem obtaining the ADC value from python script mcp3002_adv_value.py, the exception message was: %s",e.getMessage()), e);
+        try {
+            double thermistorAdcValue = Double.parseDouble(results.get(0));
+            log.debug(String.format("ADC value from python script: %s", results.get(0)));
+            return thermistorAdcValue;
+        } catch (NumberFormatException e) {
+            PumpControllerException pumpControllerException = new PumpControllerException(String.format("Something other than a double was returned when running the script to obtain the ADC value of th thermistor, the result was: %s.",
+                    results.toString()));
+            log.error("Exception encountered while obtaining the ADC value of the thermistor", pumpControllerException);
+            throw pumpControllerException;
         }
     }
 
-    private static List<String> readProcessOutput(InputStream inputStream) throws IOException {
+    private static List<String> readProcessOutput(InputStream inputStream) {
         try (BufferedReader output = new BufferedReader(new InputStreamReader(inputStream))) {
             return output.lines()
                     .collect(Collectors.toList());
+        } catch (IOException e) {
+            PumpControllerException pumpControllerException = new PumpControllerException("There was an issue reading from the InputStream");
+            log.error("Issue reading from the InputStream", pumpControllerException);
+            throw pumpControllerException;
         }
     }
 
