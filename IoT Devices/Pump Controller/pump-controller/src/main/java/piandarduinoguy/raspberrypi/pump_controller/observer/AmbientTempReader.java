@@ -102,7 +102,7 @@ public class AmbientTempReader implements Runnable, Observer {
             return thermistorAdcValue;
         } catch (NumberFormatException e) {
             PumpControllerException pumpControllerException = new PumpControllerException(String.format("Something other than a double was returned when running the script to obtain the ADC value of th thermistor, the result was: %s.",
-                    results.toString()));
+                    results.toString()), e);
             log.error("Exception encountered while obtaining the ADC value of the thermistor", pumpControllerException);
             throw pumpControllerException;
         }
@@ -113,7 +113,7 @@ public class AmbientTempReader implements Runnable, Observer {
             return output.lines()
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            PumpControllerException pumpControllerException = new PumpControllerException("There was an issue reading from the InputStream");
+            PumpControllerException pumpControllerException = new PumpControllerException("There was an issue reading from the InputStream", e);
             log.error("Issue reading from the InputStream", pumpControllerException);
             throw pumpControllerException;
         }
