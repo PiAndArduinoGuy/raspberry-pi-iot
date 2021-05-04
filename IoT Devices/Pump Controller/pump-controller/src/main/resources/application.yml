@@ -35,4 +35,4 @@ automatic-pump-toggler:
 ambient-temp-reader:
   scheduler:
     delay-seconds: 10
-    rate-seconds: 5
+    rate-seconds: 300

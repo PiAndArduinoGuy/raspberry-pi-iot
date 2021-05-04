@@ -58,7 +58,7 @@ class AutomaticPumpTogglerUnitTest {
     private PumpToggler pumpToggler;
 
     @MockBean
-    private AmbientTempReaderUnitTest ambientTempReaderMock;
+    private AmbientTempReader ambientTempReaderMock;
 
     @Captor
     private ArgumentCaptor<Double> turnOnTempCaptor;
