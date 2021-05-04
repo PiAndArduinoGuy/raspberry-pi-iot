@@ -19,10 +19,9 @@ import piandarduinoguy.raspberrypi.pump_controller.observable.NewAmbientTempRead
 import piandarduinoguy.raspberrypi.pump_controller.observable.PumpOverrideStatusObservable;
 import piandarduinoguy.raspberrypi.pump_controller.observable.PumpTurnOnTempObservable;
 import piandarduinoguy.raspberrypi.pump_controller.observer.AmbientTempReader;
-import piandarduinoguy.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
-import piandarduinoguy.raspberrypi.pump_controller.observer.AmbientTempReaderUnitTest;
 import piandarduinoguy.raspberrypi.pump_controller.observer.AutomaticPumpToggler;
 import piandarduinoguy.raspberrypi.pump_controller.observer.ManualPumpToggler;
+import piandarduinoguy.raspberrypi.pump_controller.publisher.AmbientTempPublisher;
 import piandarduinoguy.raspberrypi.pump_controller.subscriber.UpdatedPumpConfigSubscriber;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;

@@ -77,8 +77,7 @@ public class AmbientTempReader implements Runnable, Observer {
 
     private void getAmbientTempAndNotifyObservers() {
         log.info("Attempting to read temperature");
-        double adcThermistorVoltage = 0;
-        adcThermistorVoltage = getAdcVoltageOfThermistor();
+        double adcThermistorVoltage = getAdcVoltageOfThermistor();
         double thermistorResistance = getThermistorResistanceFromAdcVoltage(adcThermistorVoltage);
         this.newAmbientTempReadingObservable.setTemp(getTempFromThermistorResistance(thermistorResistance));
     }
@@ -140,7 +139,7 @@ public class AmbientTempReader implements Runnable, Observer {
 
     private static double getThermistorResistanceFromAdcVoltage(final double conversion_value) {
         double thermistorResistance = (SERIES_RESISTANCE) / ((1023.0 / conversion_value) - 1.0);
-        log.info(String.format("Thermistor resistance: %s", thermistorResistance));
+        log.debug(String.format("Thermistor resistance: %s", thermistorResistance));
         return thermistorResistance;
     }
 
