@@ -1,5 +1,6 @@
 package piandarduinoguy.raspberrypi.control_hub.subscriber;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @EnableBinding(ControlHubChannels.class)
+@Slf4j
 public class AmbientTempReadingSubscriber {
     private List<Double> ambientTempReadings;
     private LatestFifteenAmbientTempReadingsObservable latestFifteenAmbientTempReadingsObservable;
@@ -30,6 +32,7 @@ public class AmbientTempReadingSubscriber {
 
     @StreamListener(ControlHubChannels.NEW_AMBIENT_TEMP_INPUT)
     private void receiveNewAmbientTempReading(String receivedAmbientTempReading) {
+        log.info("Received message {} on queue {}.", receivedAmbientTempReading, ControlHubChannels.NEW_AMBIENT_TEMP_INPUT);
         this.latestAmbientTempReadingObservable.setLatestAmbientTempReading(Double.parseDouble(receivedAmbientTempReading));
 
         this.ambientTempReadings.add(Double.parseDouble(receivedAmbientTempReading));

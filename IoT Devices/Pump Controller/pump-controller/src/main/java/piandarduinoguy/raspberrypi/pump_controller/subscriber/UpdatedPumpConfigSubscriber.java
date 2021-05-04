@@ -32,7 +32,7 @@ public class UpdatedPumpConfigSubscriber {
 
     @StreamListener(PumpControllerChannels.UPDATED_PUMP_CONFIG_INPUT)
     public void sendPumpUpdateConfigToObservers(PumpConfig newPumpConfig) {
-        log.info(String.format("Received - %s", newPumpConfig.toString()));
+        log.info("Received message {} on queue {}.", newPumpConfig.toString(), PumpControllerChannels.UPDATED_PUMP_CONFIG_INPUT);
         notifyRelevantObserverOfPumpConfigAttributeChange(newPumpConfig);
     }
 

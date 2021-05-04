@@ -17,6 +17,7 @@ public class UpdatedPumpConfigPublisher {
     }
 
     public void publishNewPumpConfig(PumpConfig newPumpConfig) {
+        log.info("Sending message {} on the queue {}", newPumpConfig.toString(), controlHubChannels.newPumpConfigOutput());
         controlHubChannels.newPumpConfigOutput().send(MessageBuilder.withPayload(newPumpConfig).build());
     }
 
