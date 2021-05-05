@@ -15,7 +15,7 @@ import piandarduinoguy.raspberrypi.pump_controller.publisher.PumpControllerToggl
 public class PumpToggler {
     private PumpState pumpState = PumpState.OFF;
     private final GpioController gpioController = GpioFactory.getInstance();
-    private final GpioPinDigitalOutput signalPin = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_15, "signalPin", PinState.LOW);
+    private final GpioPinDigitalOutput signalPin = gpioController.provisionDigitalOutputPin(RaspiPin.GPIO_03, "signalPin", PinState.LOW);
     private PumpControllerToggleStatusPublisher pumpControllerToggleStatusPublisher;
 
     @Autowired
