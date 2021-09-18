@@ -1,0 +1,5 @@
+server:
+  servlet:
+    context-path: "/security"
+
+security-config-file-location: /home/quintin/Desktop/security_config.json

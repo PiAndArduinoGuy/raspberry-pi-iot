@@ -2,47 +2,45 @@ package piandarduinoguy.raspberrypi.securitymsrv.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.TestPropertySource;
+import piandarduinoguy.raspberrypi.securitymsrv.TestUtils;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityConfig;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityState;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityStatus;
+import piandarduinoguy.raspberrypi.securitymsrv.exception.SecurityConfigFileSaveException;
 
 import java.io.File;
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
 @TestPropertySource("classpath:application-test.properties")
 class SecurityConfigServiceUnitTest {
-    @Autowired
+    @SpyBean
     private ObjectMapper objectMapper;
 
     @Autowired
     private SecurityConfigService securityConfigService;
 
-    @Value("${security-config-file-location}")
-    private String securityConfigFileLocation;
+    @Autowired
+    private TestUtils testUtils;
 
-    private File testSecurityConfigFile;
-
-    @BeforeEach
-    public void setUp() {
-        this.testSecurityConfigFile = new File(securityConfigFileLocation);
-    }
 
     @Test
     @DisplayName("Given a security config file exists with security status BREACHED and security state ARMED, " +
             "when getSecurityConfig called, " +
             "then returned with expected domain object attributes set.")
     void canGetSecurityConfig() throws Exception {
-
-        objectMapper.writeValue(testSecurityConfigFile, new SecurityConfig(SecurityStatus.BREACHED, SecurityState.ARMED));
+        testUtils.createSecurityConfigFile(new SecurityConfig(SecurityStatus.BREACHED, SecurityState.ARMED));
 
         SecurityConfig securityConfig = securityConfigService.getSecurityConfig();
 
@@ -59,18 +57,27 @@ class SecurityConfigServiceUnitTest {
 
         securityConfigService.saveSecurityConfig(securityConfig);
 
-        assertThatExpectedSecurityConfigJsonFileSaved();
+        testUtils.assertThatExpectedSecurityConfigJsonFileSaved(securityConfig);
+    }
+
+    @Test
+    @DisplayName("Given object mapper throws an IO exception " +
+            "when saveSecurityConfig called " +
+            "then throw SecurityConfigFileSaveException with expected message.")
+    void canThrowSecurityConfigFileSaveExceptionIfObjectMapperThrowsIOException() throws Exception {
+        doThrow(new IOException("An IO exception has occurred.")).when(objectMapper).writeValue(any(File.class), any(SecurityConfig.class));
+
+        SecurityConfig securityConfig = new SecurityConfig(SecurityStatus.BREACHED, SecurityState.ARMED);
+
+        assertThatThrownBy(() -> securityConfigService.saveSecurityConfig(securityConfig))
+                .isInstanceOf(SecurityConfigFileSaveException.class)
+                .hasMessage("Could not save the security config file object SecurityConfig(securityStatus=BREACHED, securityState=ARMED) to src/test/resources/security_config.json due to an IOException with message \"An IO exception has occurred.\".");
+
     }
 
     @AfterEach
     void tearDown() {
-        this.testSecurityConfigFile.delete();
-    }
-
-    private void assertThatExpectedSecurityConfigJsonFileSaved() throws Exception {
-        SecurityConfig securityConfig = objectMapper.readValue(testSecurityConfigFile, SecurityConfig.class);
-        assertThat(securityConfig.getSecurityStatus()).isEqualTo(SecurityStatus.BREACHED);
-        assertThat(securityConfig.getSecurityState()).isEqualTo(SecurityState.ARMED);
+        this.testUtils.deleteSecurityConfigFile();
     }
 
 }
