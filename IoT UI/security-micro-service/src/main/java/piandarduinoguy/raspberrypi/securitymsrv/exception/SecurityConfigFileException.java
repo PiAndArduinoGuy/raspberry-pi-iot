@@ -2,8 +2,8 @@ package piandarduinoguy.raspberrypi.securitymsrv.exception;
 
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityConfig;
 
-public class SecurityConfigFileSaveException extends RuntimeException {
-    public SecurityConfigFileSaveException(String message) {
+public class SecurityConfigFileException extends RuntimeException {
+    public SecurityConfigFileException(String message) {
         super(message);
     }
 }

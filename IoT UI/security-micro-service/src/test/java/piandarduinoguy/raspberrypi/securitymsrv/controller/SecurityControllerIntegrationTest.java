@@ -1,6 +1,8 @@
 package piandarduinoguy.raspberrypi.securitymsrv.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,24 +36,46 @@ class SecurityControllerIntegrationTest {
     @Autowired
     private TestUtils testUtils;
 
+    private final SecurityConfig existingSecurityConfig = new SecurityConfig(SecurityStatus.BREACHED, SecurityState.DISARMED);
+
     @LocalServerPort
     private int port;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        // ensure there is a security config file to start off with
+        testUtils.createSecurityConfigFile(existingSecurityConfig);
+    }
 
     @DisplayName("Given a security config json object that is valid " +
             "when put endpoint hit to update security config " +
             "then 201 CREATED response returned and security config updated as expected.")
     @Test
-    void canSaveUpdatedSecurityConfig() throws Exception{
-        // ensure there is a security config file to be updated
-        testUtils.createSecurityConfigFile(new SecurityConfig(SecurityStatus.BREACHED, SecurityState.DISARMED));
-
+    void canSaveUpdatedSecurityConfig() throws Exception {
         SecurityConfig updatedSecurityConfig = new SecurityConfig(SecurityStatus.SAFE, SecurityState.ARMED);
         HttpEntity<SecurityConfig> httpEntity = new HttpEntity<>(updatedSecurityConfig);
-        ResponseEntity<Void> responseEntity = restTemplate.exchange("http://localhost:"+port+"/security/update/security-config", HttpMethod.PUT, httpEntity, Void.class);
+        ResponseEntity<Void> responseEntity = restTemplate.exchange("http://localhost:" + port + "/security/update/security-config", HttpMethod.PUT, httpEntity, Void.class);
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         testUtils.assertThatExpectedSecurityConfigJsonFileSaved(updatedSecurityConfig);
+    }
 
+    @DisplayName("Given a security config json object exists " +
+            "when get endpoint hit to " +
+            "then 200 OK response security config returned.")
+    @Test
+    void canGetSecurityConfig() {
+        ResponseEntity<SecurityConfig> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/security-config", SecurityConfig.class);
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        SecurityConfig returnedSecurityConfig = responseEntity.getBody();
+        assertThat(returnedSecurityConfig).isNotNull();
+        assertThat(returnedSecurityConfig.getSecurityStatus()).isEqualTo(existingSecurityConfig.getSecurityStatus());
+        assertThat(returnedSecurityConfig.getSecurityState()).isEqualTo(existingSecurityConfig.getSecurityState());
+    }
+
+    @AfterEach
+    void tearDown() {
         testUtils.deleteSecurityConfigFile();
     }
 }

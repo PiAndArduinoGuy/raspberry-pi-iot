@@ -21,9 +21,9 @@ public class SecurityExceptionHandler {
 
     }
 
-    public ResponseEntity<Problem> handleSecurityConfigFileSaveException(SecurityConfigFileSaveException securityConfigFileSaveException) {
+    public ResponseEntity<Problem> handleSecurityConfigFileException(SecurityConfigFileException securityConfigFileException) {
         Problem zalandoProblem = new Problem();
-        zalandoProblem.setDetail(securityConfigFileSaveException.getMessage());
+        zalandoProblem.setDetail(securityConfigFileException.getMessage());
         zalandoProblem.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
         zalandoProblem.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 

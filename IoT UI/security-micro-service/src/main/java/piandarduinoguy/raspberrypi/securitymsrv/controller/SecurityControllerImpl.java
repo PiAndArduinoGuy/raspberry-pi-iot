@@ -8,14 +8,18 @@ import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityConfig;
 import piandarduinoguy.raspberrypi.securitymsrv.service.SecurityConfigService;
 
 @RestController
-public class SecurityControllerImpl implements SecurityController{
+public class SecurityControllerImpl implements SecurityController {
     @Autowired
     private SecurityConfigService securityConfigService;
 
-    public ResponseEntity<Void> updateSecurityConfig(SecurityConfig securityConfig){
+    public ResponseEntity<Void> updateSecurityConfig(SecurityConfig securityConfig) {
         securityConfigService.saveSecurityConfig(securityConfig);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @Override
+    public ResponseEntity<SecurityConfig> getSecurityConfig() {
+        return new ResponseEntity<>(securityConfigService.getSecurityConfig(), HttpStatus.OK);
+    }
 }

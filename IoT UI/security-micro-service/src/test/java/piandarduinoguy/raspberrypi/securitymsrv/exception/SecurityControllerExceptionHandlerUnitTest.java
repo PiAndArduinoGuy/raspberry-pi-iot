@@ -16,10 +16,10 @@ class SecurityControllerExceptionHandlerUnitTest {
     @Autowired
     private SecurityExceptionHandler securityExceptionHandler;
 
-    @DisplayName("When handleInvalidSecurityConfigException method called " +
+    @DisplayName("When handleHttpMessageNotReadableException method called " +
             "then return expected Zalando problem")
     @Test
-    void canReturnExpectedZalandoProblemForInvalidSecurityConfigException() {
+    void canReturnExpectedZalandoProblemForHttpMessageNotReadableException() {
         String exceptionMessage = "The provided SecurityConfig is invalid";
         ResponseEntity<Problem> responseEntity = securityExceptionHandler.handleHttpMessageNotReadableException(new HttpMessageNotReadableException(exceptionMessage));
 
@@ -29,12 +29,12 @@ class SecurityControllerExceptionHandlerUnitTest {
     }
 
 
-    @DisplayName("When handleSecurityConfigFileSaveException method called " +
+    @DisplayName("When handleSecurityConfigFileException method called " +
             "then return expected Zalando problem")
     @Test
-    void canReturnZalandoProblemForSecurityConfigFileSaveException(){
-        String exceptionMessage = "This is a SecurityConfigFileSaveException.";
-        ResponseEntity<Problem> responseEntity = securityExceptionHandler.handleSecurityConfigFileSaveException(new SecurityConfigFileSaveException(exceptionMessage));
+    void canReturnZalandoProblemForSecurityConfigFileException(){
+        String exceptionMessage = "This is a SecurityConfigFileException.";
+        ResponseEntity<Problem> responseEntity = securityExceptionHandler.handleSecurityConfigFileException(new SecurityConfigFileException(exceptionMessage));
 
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
