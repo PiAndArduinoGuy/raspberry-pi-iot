@@ -1,32 +1,36 @@
 package piandarduinoguy.raspberrypi.securitymsrv.service;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.multipart.MultipartFile;
 import piandarduinoguy.raspberrypi.securitymsrv.TestUtils;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityConfig;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityState;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityStatus;
+import piandarduinoguy.raspberrypi.securitymsrv.exception.ImageFileException;
 import piandarduinoguy.raspberrypi.securitymsrv.exception.SecurityConfigFileException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestPropertySource("classpath:application-test.properties")
@@ -93,9 +97,36 @@ class SecurityConfigServiceUnitTest {
 
     }
 
+    @Test
+    @DisplayName("Given a valid multipart file " +
+            "when saveImage called " +
+            "then image is saved as expected.")
+    void canSaveUploadedImageToBeProcessed() throws Exception {
+        MockMultipartFile image = TestUtils.createMockMultipartFile();
+
+        securityConfigService.saveImage(image);
+
+        TestUtils.assertThatExpectedImageUploaded(image);
+    }
+
+    @Disabled("Requires mocking of static method FileUtils.writeByteArrayToFile, use powermock for this then remove this annotation.")
+    @Test
+    @DisplayName("Given FileUtils.writeByteArrayToFile method throws an IOException " +
+            "when saveImage called " +
+            "then an ImageFileException is thrown.")
+    void canThrowImageFileExceptionWhenSaveImageCalled() throws Exception {
+        MultipartFile image = new MockMultipartFile("test_new_capture.jpeg", new FileInputStream("directory/that/does/not/exists/test_new_capture.jpeg"));
+
+        assertThatThrownBy(() -> {
+            securityConfigService.saveImage(image);
+        }).isInstanceOf(ImageFileException.class).hasMessage("An IOException occurred trying to save the image.");
+
+    }
+
     @AfterEach
     void tearDown() {
         this.testUtils.deleteSecurityConfigFile();
+        this.testUtils.deleteUploadedFileIfExists();
     }
 
 }
