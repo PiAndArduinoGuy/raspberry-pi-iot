@@ -52,7 +52,7 @@ class SecurityControllerObjectDetectionIntegrationTest {
                 andExpect(status().isAccepted());
 
         TestUtils.assertThatExpectedImageUploaded(image);
-        // assertion that we can perform detection after it has saved
+        // TODO: assertion that we can perform detection after it has been temporarily saved
 
         testUtils.deleteUploadedFileIfExists();
     }

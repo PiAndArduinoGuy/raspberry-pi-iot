@@ -27,6 +27,7 @@ public class SecurityControllerImpl implements SecurityController {
     @Override
     public ResponseEntity<Void> detectObjectsInImage(MultipartFile image) {
         securityConfigService.saveImage(image);
+        // TODO: perform the object detection
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }
