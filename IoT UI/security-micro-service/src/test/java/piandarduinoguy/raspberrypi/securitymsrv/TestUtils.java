@@ -1,6 +1,7 @@
 package piandarduinoguy.raspberrypi.securitymsrv;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,12 @@ public class TestUtils {
 
     @Value("${resources.base.location}")
     private String resourcesBaseLocation;
+
+    @Value("${new-capture.file-name}")
+    private String newCaptureFileName;
+
+    @Value("${new-capture.annotated.file-name}")
+    private String newCaptureAnnotatedFileName;
 
     public File testSecurityConfigFile;
 
@@ -46,7 +53,7 @@ public class TestUtils {
     }
 
     public void deleteUploadedFileIfExists(){
-        File savedTestImage = new File("src/test/resources/temp_test_new_capture.jpeg");
+        File savedTestImage = new File("src/test/resources/application/temp_test_new_capture.jpeg");
         if (savedTestImage.exists()){
             savedTestImage.delete();
         }
@@ -60,11 +67,30 @@ public class TestUtils {
                 new FileInputStream("src/test/resources/test_new_capture.jpeg"));
     }
 
-    public static void assertThatExpectedImageUploaded(MockMultipartFile image) throws Exception{
-        File expectedSavedFile = new File("src/test/resources/temp_test_new_capture.jpeg");
+    public void assertThatExpectedImageUploaded(MockMultipartFile image) throws Exception{
+        File expectedSavedFile = new File(resourcesBaseLocation + newCaptureFileName);
         assertThat(expectedSavedFile).exists();
         byte[] expectedImageByteData = image.getBytes();
         byte[] savedImageByteData = FileUtils.readFileToByteArray(expectedSavedFile);
         assertThat(expectedImageByteData).isEqualTo(savedImageByteData);
+    }
+
+    public void createExpectedAnnotatedImageFile() throws IOException {
+        File annotatedImageFileSource = new File("src/test/resources/test_new_capture_annotated.jpeg");
+        byte[] annotatedImageBytes = FileUtils.readFileToByteArray(annotatedImageFileSource);
+        File annotatedImageFileDestination = new File("src/test/resources/application/test_new_capture_annotated.jpeg");
+        FileUtils.writeByteArrayToFile(annotatedImageFileDestination, annotatedImageBytes);
+    }
+
+    public void deleteAnnotatedImage() {
+        File annotatedImageFileDestination = new File(resourcesBaseLocation + newCaptureAnnotatedFileName);
+        annotatedImageFileDestination.delete();
+    }
+
+    public String getExpectedBase64EncodedAnnotatedImage() throws IOException {
+        File annotatedImageFileSource = new File(resourcesBaseLocation + newCaptureAnnotatedFileName);
+        byte[] annotatedImageBytes = FileUtils.readFileToByteArray(annotatedImageFileSource);
+        String expectedBase64EncodedAnnotatedImage = Base64.encode(annotatedImageBytes);
+        return expectedBase64EncodedAnnotatedImage;
     }
 }

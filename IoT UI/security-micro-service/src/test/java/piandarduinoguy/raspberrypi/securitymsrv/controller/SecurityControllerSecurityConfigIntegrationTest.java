@@ -1,44 +1,29 @@
 package piandarduinoguy.raspberrypi.securitymsrv.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.ResourceUtils;
-import org.springframework.web.multipart.MultipartFile;
 import piandarduinoguy.raspberrypi.securitymsrv.TestUtils;
+import piandarduinoguy.raspberrypi.securitymsrv.domain.Problem;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityConfig;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityState;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityStatus;
-import piandarduinoguy.raspberrypi.securitymsrv.service.SecurityConfigService;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource("classpath:application-test.properties")
@@ -92,6 +77,53 @@ class SecurityControllerSecurityConfigIntegrationTest {
         assertThat(returnedSecurityConfig.getSecurityStatus()).isEqualTo(existingSecurityConfig.getSecurityStatus());
         assertThat(returnedSecurityConfig.getSecurityState()).isEqualTo(existingSecurityConfig.getSecurityState());
     }
+
+    @DisplayName("Given an annotated image exists " +
+            "when get to the /annotated-image endpoint is made " +
+            "then a base64 encoded image is returned with status 200 OK.")
+    @Test
+    void canGetAnnotatedImage() throws Exception {
+        testUtils.createExpectedAnnotatedImageFile();
+
+        ResponseEntity<String> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/annotated-image", String.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualToIgnoringCase(testUtils.getExpectedBase64EncodedAnnotatedImage());
+
+        testUtils.deleteAnnotatedImage();
+    }
+
+    @DisplayName("Given an annotated image does not exist " +
+            "when get to the /annotated-image endpoint is made " +
+            "then return expected Zalando problem.")
+    @Test
+    void canReturnZalandoProblemIfNoAnnotatedImageExists() {
+        ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/annotated-image", Problem.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        Problem problem = responseEntity.getBody();
+        assertThat(problem).isNotNull();
+        assertThat(problem.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(problem.getDetail()).isEqualToIgnoringCase("The File src/test/resources/application/test_new_capture_annotated.jpeg does not exist.");
+        assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.NOT_FOUND.getReasonPhrase());
+    }
+
+    @DisplayName("Given an IOException throw " +
+            "when get to the /annotated-image endpoint is made " +
+            "then return expected Zalando problem")
+    @Test
+    @Disabled("Requires mocking of static Base64.encode method, use powermock for this then remove this annotation.")
+    void canReturnZalandoProblemIfGetAnnotatedImageMethodThrowsIoException() {
+        ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/annotated-image", Problem.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        Problem problem = responseEntity.getBody();
+        assertThat(problem).isNotNull();
+        assertThat(problem.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        assertThat(problem.getDetail()).isEqualToIgnoringCase("The image test_new_capture_annotated.jpeg could not be encoded to base64 string due to an IOException being thrown with message \"File 'src/test/resources/application/test_new_capture_annotated.jpeg' does not exist\".");
+        assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.NOT_FOUND.getReasonPhrase());
+    }
+
 
     @AfterEach
     void tearDown() {

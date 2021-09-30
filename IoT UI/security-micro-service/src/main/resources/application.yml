@@ -5,3 +5,8 @@ server:
 resources:
   base:
     location: "src/main/resources/"
+
+new-capture:
+    file-name: "new_capture.jpeg"
+    annotated:
+      file-name: "test_new_capture_annotated.jpeg"

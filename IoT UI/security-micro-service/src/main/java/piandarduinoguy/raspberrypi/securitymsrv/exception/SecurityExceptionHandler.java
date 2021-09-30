@@ -22,6 +22,15 @@ public class SecurityExceptionHandler {
     }
 
     //TODO: add exception handler here for ImageFileExceptions
+    @ExceptionHandler(ImageFileException.class)
+    public ResponseEntity<Problem> handleImageFileException(ImageFileException imageFileException){
+        Problem zalandoProblem = new Problem();
+        zalandoProblem.setDetail(imageFileException.getMessage());
+        zalandoProblem.setTitle(imageFileException.getHttpStatus().getReasonPhrase());
+        zalandoProblem.setStatus(imageFileException.getHttpStatus().value());
+
+        return new ResponseEntity<>(zalandoProblem, imageFileException.getHttpStatus());
+    }
 
     public ResponseEntity<Problem> handleSecurityConfigFileException(SecurityConfigFileException securityConfigFileException) {
         Problem zalandoProblem = new Problem();

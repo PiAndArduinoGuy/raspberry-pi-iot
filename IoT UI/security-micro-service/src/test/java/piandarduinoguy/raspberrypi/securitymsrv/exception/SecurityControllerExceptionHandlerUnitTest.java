@@ -41,6 +41,18 @@ class SecurityControllerExceptionHandlerUnitTest {
         assertExpectedZalandoProblem(exceptionMessage, responseEntity, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @DisplayName("When handleImageFileException method called " +
+            "then return expected Zalando problem")
+    @Test
+    void canReturnZalandoProblemForImageFileException(){
+        String exceptionMessage = "This is a ImageFileException.";
+        ResponseEntity<Problem> responseEntity = securityExceptionHandler.handleImageFileException(new ImageFileException(exceptionMessage, HttpStatus.INTERNAL_SERVER_ERROR));
+
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertExpectedZalandoProblem(exceptionMessage, responseEntity, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private void assertExpectedZalandoProblem(String exceptionMessage, ResponseEntity<Problem> responseEntity, HttpStatus expectedHttpStatus) {
         Problem zalandoProblem = responseEntity.getBody();
         assertThat(zalandoProblem).isNotNull();

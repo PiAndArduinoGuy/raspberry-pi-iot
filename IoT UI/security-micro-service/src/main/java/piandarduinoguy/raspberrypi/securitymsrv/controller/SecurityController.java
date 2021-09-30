@@ -30,4 +30,9 @@ public interface SecurityController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @GetMapping("annotated-image")
+    default ResponseEntity<String> getAnnotatedImage(){
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
 }

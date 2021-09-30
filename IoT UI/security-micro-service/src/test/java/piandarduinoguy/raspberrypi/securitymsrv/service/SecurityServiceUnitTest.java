@@ -1,7 +1,6 @@
 package piandarduinoguy.raspberrypi.securitymsrv.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Ignore;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 import piandarduinoguy.raspberrypi.securitymsrv.TestUtils;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityConfig;
@@ -24,7 +22,6 @@ import piandarduinoguy.raspberrypi.securitymsrv.exception.SecurityConfigFileExce
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,15 +31,24 @@ import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest
 @TestPropertySource("classpath:application-test.properties")
-class SecurityConfigServiceUnitTest {
+class SecurityServiceUnitTest {
     @SpyBean
     private ObjectMapper objectMapper;
 
     @Autowired
-    private SecurityConfigService securityConfigService;
+    private SecurityService securityService;
 
     @Autowired
     private TestUtils testUtils;
+
+    @Value("${resources.base.location}")
+    private String resourcesBaseLocation;
+
+    @Value("${new-capture.file-name}")
+    private String newCaptureFileName;
+
+    @Value("${new-capture.annotated.file-name}")
+    private String newCaptureAnnotatedFileName;
 
 
     @Test
@@ -52,7 +58,7 @@ class SecurityConfigServiceUnitTest {
     void canGetSecurityConfig() throws Exception {
         testUtils.createSecurityConfigFile(new SecurityConfig(SecurityStatus.BREACHED, SecurityState.ARMED));
 
-        SecurityConfig securityConfig = securityConfigService.getSecurityConfig();
+        SecurityConfig securityConfig = securityService.getSecurityConfig();
 
         assertThat(securityConfig.getSecurityStatus()).isEqualTo(SecurityStatus.BREACHED);
         assertThat(securityConfig.getSecurityState()).isEqualTo(SecurityState.ARMED);
@@ -65,7 +71,7 @@ class SecurityConfigServiceUnitTest {
     void canSaveSecurityConfig() throws Exception {
         SecurityConfig securityConfig = new SecurityConfig(SecurityStatus.BREACHED, SecurityState.ARMED);
 
-        securityConfigService.saveSecurityConfig(securityConfig);
+        securityService.saveSecurityConfig(securityConfig);
 
         testUtils.assertThatExpectedSecurityConfigJsonFileSaved(securityConfig);
     }
@@ -79,9 +85,9 @@ class SecurityConfigServiceUnitTest {
 
         SecurityConfig securityConfig = new SecurityConfig(SecurityStatus.BREACHED, SecurityState.ARMED);
 
-        assertThatThrownBy(() -> securityConfigService.saveSecurityConfig(securityConfig))
+        assertThatThrownBy(() -> securityService.saveSecurityConfig(securityConfig))
                 .isInstanceOf(SecurityConfigFileException.class)
-                .hasMessage("Could not save the security config file object SecurityConfig(securityStatus=BREACHED, securityState=ARMED) to src/test/resources/security_config.json due to an IOException with message \"An IO exception has occurred.\".");
+                .hasMessage("Could not save the security config file object SecurityConfig(securityStatus=BREACHED, securityState=ARMED) to src/test/resources/application/security_config.json due to an IOException with message \"An IO exception has occurred.\".");
 
     }
 
@@ -91,7 +97,7 @@ class SecurityConfigServiceUnitTest {
             "then throw SecurityConfigFileSaveException with expected message.")
     void canThrowSecurityConfigFileExceptionIfObjectMapperReadMethodThrowsIOException() throws Exception {
         doThrow(new IOException("An IO exception has occurred.")).when(objectMapper).readValue(eq(testUtils.testSecurityConfigFile), eq(SecurityConfig.class));
-        assertThatThrownBy(() -> securityConfigService.getSecurityConfig())
+        assertThatThrownBy(() -> securityService.getSecurityConfig())
                 .isInstanceOf(SecurityConfigFileException.class)
                 .hasMessage("Could not retrieve security config due to an IOException with message \"An IO exception has occurred.\".");
 
@@ -104,9 +110,9 @@ class SecurityConfigServiceUnitTest {
     void canSaveUploadedImageToBeProcessed() throws Exception {
         MockMultipartFile image = TestUtils.createMockMultipartFile();
 
-        securityConfigService.saveImage(image);
+        securityService.saveImage(image);
 
-        TestUtils.assertThatExpectedImageUploaded(image);
+        testUtils.assertThatExpectedImageUploaded(image);
     }
 
     @Disabled("Requires mocking of static method FileUtils.writeByteArrayToFile, use powermock for this then remove this annotation.")
@@ -118,9 +124,34 @@ class SecurityConfigServiceUnitTest {
         MultipartFile image = new MockMultipartFile("test_new_capture.jpeg", new FileInputStream("directory/that/does/not/exists/test_new_capture.jpeg"));
 
         assertThatThrownBy(() -> {
-            securityConfigService.saveImage(image);
+            securityService.saveImage(image);
         }).isInstanceOf(ImageFileException.class).hasMessage("An IOException occurred trying to save the image.");
 
+    }
+
+    @Test
+    @DisplayName("Given an annotated image exists " +
+            "when getAnnotatedImage method called " +
+            "then the expected is returned as base64 encoded image.")
+    void canReturnAnnotatedImage() throws Exception {
+        testUtils.createExpectedAnnotatedImageFile();
+
+        String base64AnnotatedImage = securityService.getBase64AnnotatedImage();
+
+        assertThat(testUtils.getExpectedBase64EncodedAnnotatedImage()).isEqualToIgnoringCase(base64AnnotatedImage);
+
+        testUtils.deleteAnnotatedImage();
+    }
+
+    @Disabled("Requires mocking of static Base64.encode method, use powermock for this then remove this annotation.")
+    @Test
+    @DisplayName("Given Base64.encode method throws an IOException " +
+            "when getBase64AnnotatedImage called " +
+            "then an ImageFileException is thrown.")
+    void canThrowImageFileExceptionWhenGetBase64AnnotatedImageCalled() {
+        assertThatThrownBy(() -> securityService.getBase64AnnotatedImage())
+                .isInstanceOf(ImageFileException.class)
+                .hasMessage("The File src/test/resources/application/test_new_capture_annotated.jpeg does not exist.");
     }
 
     @AfterEach
