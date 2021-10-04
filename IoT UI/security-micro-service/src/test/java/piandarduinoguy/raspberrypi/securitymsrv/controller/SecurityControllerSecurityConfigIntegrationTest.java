@@ -108,7 +108,7 @@ class SecurityControllerSecurityConfigIntegrationTest {
         assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.NOT_FOUND.getReasonPhrase());
     }
 
-    @DisplayName("Given an IOException throw " +
+    @DisplayName("Given an IOException thrown " +
             "when get to the /annotated-image endpoint is made " +
             "then return expected Zalando problem")
     @Test
@@ -116,12 +116,28 @@ class SecurityControllerSecurityConfigIntegrationTest {
     void canReturnZalandoProblemIfGetAnnotatedImageMethodThrowsIoException() {
         ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/annotated-image", Problem.class);
 
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         Problem problem = responseEntity.getBody();
         assertThat(problem).isNotNull();
-        assertThat(problem.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
-        assertThat(problem.getDetail()).isEqualToIgnoringCase("The image test_new_capture_annotated.jpeg could not be encoded to base64 string due to an IOException being thrown with message \"File 'src/test/resources/application/test_new_capture_annotated.jpeg' does not exist\".");
-        assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.NOT_FOUND.getReasonPhrase());
+        assertThat(problem.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        assertThat(problem.getDetail()).isEqualToIgnoringCase("The image test_new_capture_annotated.jpeg could not be encoded to base64 string due to an IOException being thrown with message \"I am an IOException\".");
+        assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+    }
+
+    @DisplayName("Given an IOException thrown " +
+            "when post to the /object-detect endpoint is made " +
+            "then return expected Zalando problem")
+    @Test
+    @Disabled("Requires mocking of static Base64.encode method, use powermock for this then remove this annotation.")
+    void canReturnZalandoProblemIfSaveImageMethodThrowsIoException() {
+        ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/object-detect", Problem.class);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        Problem problem = responseEntity.getBody();
+        assertThat(problem).isNotNull();
+        assertThat(problem.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        assertThat(problem.getDetail()).isEqualToIgnoringCase("The image %s could not be saved to the directory %s. An IOException was thrown with message \"I am an IOException\".");
+        assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
     }
 
 
