@@ -1,10 +1,13 @@
 package piandarduinoguy.raspberrypi.securitymsrv.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +21,7 @@ import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityState;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityStatus;
 import piandarduinoguy.raspberrypi.securitymsrv.exception.ImageFileException;
 import piandarduinoguy.raspberrypi.securitymsrv.exception.SecurityConfigFileException;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
 
 @SpringBootTest
 @TestPropertySource("classpath:application-test.properties")
@@ -115,20 +120,6 @@ class SecurityServiceUnitTest {
         testUtils.assertThatExpectedImageUploaded(image);
     }
 
-    @Disabled("Requires mocking of static method FileUtils.writeByteArrayToFile, use powermock for this then remove this annotation.")
-    @Test
-    @DisplayName("Given FileUtils.writeByteArrayToFile method throws an IOException " +
-            "when saveImage called " +
-            "then an ImageFileException is thrown.")
-    void canThrowImageFileExceptionWhenSaveImageCalled() throws Exception {
-        MultipartFile image = new MockMultipartFile("test_new_capture.jpeg", new FileInputStream("directory/that/does/not/exists/test_new_capture.jpeg"));
-
-        assertThatThrownBy(() -> {
-            securityService.saveImage(image);
-        }).isInstanceOf(ImageFileException.class).hasMessage("An IOException occurred trying to save the image.");
-
-    }
-
     @Test
     @DisplayName("Given an annotated image exists " +
             "when getAnnotatedImage method called " +
@@ -143,15 +134,36 @@ class SecurityServiceUnitTest {
         testUtils.deleteAnnotatedImage();
     }
 
-    @Disabled("Requires mocking of static Base64.encode method, use powermock for this then remove this annotation.")
     @Test
-    @DisplayName("Given Base64.encode method throws an IOException " +
+    @DisplayName("Given FileUtils.readFileToByteArray method throws an IOException " +
             "when getBase64AnnotatedImage called " +
             "then an ImageFileException is thrown.")
-    void canThrowImageFileExceptionWhenGetBase64AnnotatedImageCalled() {
-        assertThatThrownBy(() -> securityService.getBase64AnnotatedImage())
-                .isInstanceOf(ImageFileException.class)
-                .hasMessage("The File src/test/resources/application/test_new_capture_annotated.jpeg does not exist.");
+    void canThrowImageFileExceptionWhenGetBase64AnnotatedImageCalled() throws Exception{
+        testUtils.createExpectedAnnotatedImageFile();
+
+        try (MockedStatic<FileUtils> mockFileUtils= mockStatic(FileUtils.class)) {
+            mockFileUtils.when(()->FileUtils.readFileToByteArray(any())).thenThrow(new IOException("I am an IOException"));
+            assertThatThrownBy(() -> securityService.getBase64AnnotatedImage())
+                    .isInstanceOf(ImageFileException.class)
+                    .hasMessage("The image test_new_capture_annotated.jpeg could not be encoded to base64 string due to an IOException being thrown with message \"I am an IOException\".");
+        }
+
+        testUtils.deleteAnnotatedImage();
+    }
+
+    @Test
+    @DisplayName("Given FileUtils.writeByteArrayToFile method throws an IOException " +
+            "when saveImage called " +
+            "then an ImageFileException is thrown.")
+    void canThrowImageFileExceptionWhenSaveImageCalled() throws Exception {
+        MockMultipartFile image = TestUtils.createMockMultipartFile();
+
+        try (MockedStatic<FileUtils> mockFileUtils = mockStatic(FileUtils.class)) {
+            mockFileUtils.when(()->FileUtils.writeByteArrayToFile(any(), any())).thenThrow(new IOException("I am an IOException"));
+            assertThatThrownBy(() -> securityService.saveImage(image))
+                    .isInstanceOf(ImageFileException.class)
+                    .hasMessage("The image image could not be saved to the directory src/test/resources/application/. An IOException was thrown with message \"I am an IOException\".");
+        }
     }
 
     @AfterEach

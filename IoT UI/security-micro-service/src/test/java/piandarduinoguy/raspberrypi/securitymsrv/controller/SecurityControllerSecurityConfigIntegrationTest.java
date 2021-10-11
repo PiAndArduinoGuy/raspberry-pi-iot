@@ -1,12 +1,15 @@
 package piandarduinoguy.raspberrypi.securitymsrv.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -21,7 +24,12 @@ import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityConfig;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityState;
 import piandarduinoguy.raspberrypi.securitymsrv.domain.SecurityStatus;
 
+import java.io.File;
+import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 
@@ -36,6 +44,12 @@ class SecurityControllerSecurityConfigIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Value("${resources.base.location}")
+    private String resourcesBaseLocation;
+
+    @Value("${new-capture.annotated.file-name}")
+    private String newCaptureAnnotatedFileName;
 
     @Autowired
     private TestUtils testUtils;
@@ -98,6 +112,8 @@ class SecurityControllerSecurityConfigIntegrationTest {
             "then return expected Zalando problem.")
     @Test
     void canReturnZalandoProblemIfNoAnnotatedImageExists() {
+        testUtils.deleteAnnotatedImage();
+
         ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/annotated-image", Problem.class);
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -106,38 +122,7 @@ class SecurityControllerSecurityConfigIntegrationTest {
         assertThat(problem.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
         assertThat(problem.getDetail()).isEqualToIgnoringCase("The File src/test/resources/application/test_new_capture_annotated.jpeg does not exist.");
         assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.NOT_FOUND.getReasonPhrase());
-    }
 
-    @DisplayName("Given an IOException thrown " +
-            "when get to the /annotated-image endpoint is made " +
-            "then return expected Zalando problem")
-    @Test
-    @Disabled("Requires mocking of static Base64.encode method, use powermock for this then remove this annotation.")
-    void canReturnZalandoProblemIfGetAnnotatedImageMethodThrowsIoException() {
-        ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/annotated-image", Problem.class);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        Problem problem = responseEntity.getBody();
-        assertThat(problem).isNotNull();
-        assertThat(problem.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        assertThat(problem.getDetail()).isEqualToIgnoringCase("The image test_new_capture_annotated.jpeg could not be encoded to base64 string due to an IOException being thrown with message \"I am an IOException\".");
-        assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-    }
-
-    @DisplayName("Given an IOException thrown " +
-            "when post to the /object-detect endpoint is made " +
-            "then return expected Zalando problem")
-    @Test
-    @Disabled("Requires mocking of static Base64.encode method, use powermock for this then remove this annotation.")
-    void canReturnZalandoProblemIfSaveImageMethodThrowsIoException() {
-        ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/security/object-detect", Problem.class);
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        Problem problem = responseEntity.getBody();
-        assertThat(problem).isNotNull();
-        assertThat(problem.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        assertThat(problem.getDetail()).isEqualToIgnoringCase("The image %s could not be saved to the directory %s. An IOException was thrown with message \"I am an IOException\".");
-        assertThat(problem.getTitle()).isEqualToIgnoringCase(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
     }
 
 
